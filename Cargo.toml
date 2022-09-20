@@ -1,7 +1,13 @@
 [package]
 name = "blockchain_types"
+description = "Blockchain types for parsing blockchain information"
 version = "0.1.0"
 edition = "2021"
+documentation = "https://github.com/jase-k/blockchain-types"
+homepage = "https://github.com/jase-k/blockchain-types"
+repository = "https://github.com/jase-k/blockchain-types"
+license = "MIT"
+readme = "README.md"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
