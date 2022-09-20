@@ -1,5 +1,6 @@
 use crate::common::transaction::{Transaction};
 
+#[allow(dead_code)]
 pub struct Address {
     hash: String,
     last_transaction: u32,

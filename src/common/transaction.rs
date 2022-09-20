@@ -1,3 +1,4 @@
+#[allow(dead_code)]
 pub struct Transaction {
     date: u32,
     is_coinbase: bool, 
@@ -7,6 +8,7 @@ pub struct Transaction {
     amounts: Option<Vec<TransactionAmount>>
 }
 
+#[allow(dead_code)]
 pub struct TransactionAmount {
     amount: u64,
     address: String, 
