@@ -18,7 +18,7 @@ impl fmt::Display for BlockChainStatType {
     }
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct BlockChainStats {
     blockchain_name: String,
     id: String,       
