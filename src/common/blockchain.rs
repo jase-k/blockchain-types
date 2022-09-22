@@ -23,7 +23,7 @@ pub struct BlockChainStats {
     blockchain_name: String,
     id: String,       
     short_description: String, // (bitcoin_30_days; bitcoin_90_days, bitcoin_1_year)
-    time_offset: u32, // seconds
+    time_offset: u64, // seconds
 
     #[serde(default = "default_f64")]
     total_coin_issuance: f64,
@@ -31,26 +31,26 @@ pub struct BlockChainStats {
     #[serde(default = "default_f64")]
     total_coin_in_circulation: f64,
     
-    #[serde(default = "default_u32")]
-    block_height: u32,
+    #[serde(default = "default_u64")]
+    block_height: u64,
 
-    #[serde(default = "default_u32")]
-    block_range_start: u32,
+    #[serde(default = "default_u64")]
+    block_range_start: u64,
     
-    #[serde(default = "default_u32")]
-    block_range_end: u32,
+    #[serde(default = "default_u64")]
+    block_range_end: u64,
     
-    #[serde(default = "default_u32")]
-    date_range_start: u32,
+    #[serde(default = "default_u64")]
+    date_range_start: u64,
     
-    #[serde(default = "default_u32")]
-    date_range_end:u32,
+    #[serde(default = "default_u64")]
+    date_range_end:u64,
     
-    #[serde(default = "default_u32")]
-    active_address_total: u32,
+    #[serde(default = "default_u64")]
+    active_address_total: u64,
 
-    #[serde(default = "default_u32")]
-    last_updated: u32,
+    #[serde(default = "default_u64")]
+    last_updated: u64,
     
     #[serde(default = "default_stat_type")]
     stat_type: BlockChainStatType,
@@ -60,7 +60,7 @@ fn default_f64() -> f64{
     return 0.0
 }
 
-fn default_u32() -> u32{
+fn default_u64() -> u64{
     return 0
 }
 
@@ -74,17 +74,17 @@ impl BlockChainStats {
         blockchain_name: BlockChainNames,
         id: String,
         short_description: String,
-        time_offset: u32, 
+        time_offset: u64, 
         total_active_coins: f64,
         total_coin_issuance: f64,
-        block_height: u32,
-        active_addresses: u32,
-        last_updated: u32,
+        block_height: u64,
+        active_addresses: u64,
+        last_updated: u64,
         stat_type: BlockChainStatType,
-        block_range_start: u32,
-        block_range_end: u32,
-        date_range_start: u32,
-        date_range_end:u32
+        block_range_start: u64,
+        block_range_end: u64,
+        date_range_start: u64,
+        date_range_end:u64
     ) -> Self {
         BlockChainStats {
             blockchain_name: blockchain_name.to_string(),
@@ -103,31 +103,31 @@ impl BlockChainStats {
             stat_type: stat_type,
         }
     }
-    pub fn block_range_start(&self) -> u32 {
+    pub fn block_range_start(&self) -> u64 {
         self.block_range_start
     }
-    pub fn block_range_end(&self) -> u32 {
+    pub fn block_range_end(&self) -> u64 {
         self.block_range_end
     }
-    pub fn date_range_start(&self) -> u32 {
+    pub fn date_range_start(&self) -> u64 {
         self.date_range_start
     }
-    pub fn date_range_end(&self) -> u32 {
+    pub fn date_range_end(&self) -> u64 {
         self.date_range_end
     }
     pub fn id(&self) -> String {
         self.id.clone()
     }
-    pub fn time_offset(&self) -> u32 {
+    pub fn time_offset(&self) -> u64 {
         self.time_offset
     }
-    pub fn last_updated(&self) -> u32 {
+    pub fn last_updated(&self) -> u64 {
         self.last_updated
     }
-    pub fn active_address_total(&self) -> u32 {
+    pub fn active_address_total(&self) -> u64 {
         self.active_address_total
     }
-    pub fn block_height(&self) -> u32 {
+    pub fn block_height(&self) -> u64 {
         self.block_height
     }
     pub fn total_coin_issuance(&self) -> f64 {
@@ -146,28 +146,28 @@ impl BlockChainStats {
         self.stat_type.clone()
     }
 
-    pub fn update_last_updated(&mut self, time: u32) -> () {
+    pub fn update_last_updated(&mut self, time: u64) -> () {
         self.last_updated = time;
     }
-    pub fn update_date_range(&mut self, start_time: u32, end_time: u32) -> &mut Self {
+    pub fn update_date_range(&mut self, start_time: u64, end_time: u64) -> &mut Self {
         self.date_range_start = start_time;
         self.date_range_end = end_time;
         self
     }
-    pub fn update_block_range(&mut self, start_block: u32, end_block: u32) -> &mut Self {
+    pub fn update_block_range(&mut self, start_block: u64, end_block: u64) -> &mut Self {
         self.block_range_start = start_block;
         self.block_range_end = end_block;
         self
     }
-    pub fn update_active_address_total(&mut self, total: u32) -> &mut Self {
+    pub fn update_active_address_total(&mut self, total: u64) -> &mut Self {
         self.active_address_total = total;
         self
     }
-    pub fn update_block_height(&mut self, height: u32) -> &mut Self {
+    pub fn update_block_height(&mut self, height: u64) -> &mut Self {
         self.block_height = height;
         self
     }
-    pub fn update_total_coin_issuance_by_block(&mut self, mut block_height: u32) -> () {
+    pub fn update_total_coin_issuance_by_block(&mut self, mut block_height: u64) -> () {
         let mut bitcoin_reward: f64 = 50.0;
         let mut total_mined: f64 = 0.0;
 
