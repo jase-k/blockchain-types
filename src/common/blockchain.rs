@@ -1,6 +1,8 @@
 use serde::{Deserialize, Serialize};
 use std::fmt;
-
+use named_type_derive::*;
+use named_type::NamedType;
+use devii::devii::FetchFields;
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub enum BlockChainStatType {
@@ -18,7 +20,13 @@ impl fmt::Display for BlockChainStatType {
     }
 }
 
-#[derive(Serialize, Deserialize, Debug, Clone)]
+impl std::default::Default for BlockChainStatType {
+    fn default() -> Self {
+        BlockChainStatType::Default
+    }
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone, NamedType, Default)]
 pub struct BlockChainStats {
     blockchain_name: String,
     id: String,       
