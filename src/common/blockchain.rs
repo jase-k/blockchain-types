@@ -28,8 +28,8 @@ impl std::default::Default for BlockChainStatType {
 
 #[derive(Serialize, Deserialize, Debug, Clone, NamedType, Default)]
 pub struct BlockChainStats {
+    id: Option<u64>,       
     blockchain_name: String,
-    id: String,       
     short_description: String, // (bitcoin_30_days; bitcoin_90_days, bitcoin_1_year)
     time_offset: u64, // seconds
 
@@ -80,35 +80,24 @@ fn default_stat_type() -> BlockChainStatType {
 impl BlockChainStats {
     pub fn new(
         blockchain_name: BlockChainNames,
-        id: String,
         short_description: String,
         time_offset: u64, 
-        total_active_coins: f64,
-        total_coin_issuance: f64,
-        block_height: u64,
-        active_addresses: u64,
-        last_updated: u64,
-        stat_type: BlockChainStatType,
-        block_range_start: u64,
-        block_range_end: u64,
-        date_range_start: u64,
-        date_range_end:u64
     ) -> Self {
         BlockChainStats {
+            id: None,
             blockchain_name: blockchain_name.to_string(),
-            id,
-            short_description,      
+            short_description,     
             time_offset,
-            total_coin_issuance,
-            total_coin_in_circulation: total_active_coins,
-            block_height,
-            block_range_start,
-            block_range_end,
-            date_range_start,
-            date_range_end,
-            active_address_total: active_addresses,
-            last_updated,
-            stat_type: stat_type,
+            total_coin_issuance : 0.0,
+            total_coin_in_circulation: 0.0,
+            block_height: 0,
+            block_range_start: 0,
+            block_range_end: 0,
+            date_range_start: 0,
+            date_range_end: 0,
+            active_address_total: 0,
+            last_updated: 0,
+            stat_type: BlockChainStatType::default(),
         }
     }
     pub fn block_range_start(&self) -> u64 {
@@ -123,8 +112,8 @@ impl BlockChainStats {
     pub fn date_range_end(&self) -> u64 {
         self.date_range_end
     }
-    pub fn id(&self) -> String {
-        self.id.clone()
+    pub fn id(&self) -> Option<u64> {
+        self.id()
     }
     pub fn time_offset(&self) -> u64 {
         self.time_offset
