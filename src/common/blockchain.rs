@@ -1,4 +1,5 @@
 use serde::{Deserialize, Serialize};
+use serde::Deserializer;
 use std::fmt;
 use named_type_derive::*;
 use named_type::NamedType;
@@ -28,6 +29,7 @@ impl std::default::Default for BlockChainStatType {
 
 #[derive(Serialize, Deserialize, Debug, Clone, NamedType, Default)]
 pub struct BlockChainStats {
+    #[serde(deserialize_with = "deserialize_u64_or_string")]
     id: Option<u64>,       
     blockchain_name: String,
     short_description: String, // (bitcoin_30_days; bitcoin_90_days, bitcoin_1_year)
@@ -62,6 +64,25 @@ pub struct BlockChainStats {
     
     #[serde(default = "default_stat_type")]
     stat_type: BlockChainStatType,
+}
+
+#[derive(Deserialize)]
+#[serde(untagged)]
+enum StringOrU64 { U64(u64), Str(String) }
+pub fn deserialize_u64_or_string<'de, D>(deserializer: D) -> Result<Option<u64>, D::Error>
+    where D: Deserializer<'de>
+{
+    match StringOrU64::deserialize(deserializer)? {
+        StringOrU64::U64(v) => { Ok(Some(v)) }
+        StringOrU64::Str(v) => {
+            let res = v.parse::<u64>();
+            if let Ok(r) = res {
+                Ok(Some(r))
+            } else {
+                Err(serde::de::Error::custom("Can't parse id!"))
+            }
+        }
+    }
 }
 
 fn default_f64() -> f64{
@@ -113,7 +134,7 @@ impl BlockChainStats {
         self.date_range_end
     }
     pub fn id(&self) -> Option<u64> {
-        self.id()
+        self.id
     }
     pub fn time_offset(&self) -> u64 {
         self.time_offset
@@ -180,6 +201,12 @@ impl BlockChainStats {
     }
     pub fn update_total_coin_in_circulation(&mut self, amount: f64) -> () {
         self.total_coin_in_circulation = amount;
+    }
+}
+
+impl FetchFields for BlockChainStats {
+    fn fetch_fields() -> String {
+        format!("{{ id, blockchain_name, short_description,  time_offset, total_coin_issuance, total_coin_in_circulation, block_height, block_range_start, block_range_end, date_range_start, date_range_end, active_address_total, last_updated, stat_type}}")
     }
 }
 

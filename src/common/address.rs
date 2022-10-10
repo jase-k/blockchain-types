@@ -1,6 +1,12 @@
+use serde::{Deserialize, Serialize};
+use named_type_derive::*;
+use named_type::NamedType;
+use devii::devii::FetchFields;
+
 use crate::common::transaction::{Transaction};
 
 #[allow(dead_code)]
+#[derive(Serialize, Deserialize, Debug, Clone, NamedType, Default)]
 pub struct Address {
     hash: String,
     last_transaction: u32,
