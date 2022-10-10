@@ -30,6 +30,7 @@ impl std::default::Default for BlockChainStatType {
 #[derive(Serialize, Deserialize, Debug, Clone, NamedType, Default)]
 pub struct BlockChainStats {
     #[serde(deserialize_with = "deserialize_u64_or_string")]
+    #[serde(skip_serializing)]
     id: Option<u64>,       
     blockchain_name: String,
     short_description: String, // (bitcoin_30_days; bitcoin_90_days, bitcoin_1_year)
