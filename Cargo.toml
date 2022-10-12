@@ -17,3 +17,7 @@ serde_json = "1.0"
 named_type = "0.2.2"
 named_type_derive = "0.2.2"
 devii = "0.0.2"
+getset = "0.1.2"
+
+[dev-dependencies]
+serde_json = "1.0.86"
