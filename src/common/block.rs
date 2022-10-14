@@ -12,6 +12,7 @@ pub struct Block {
     hash: String, // Primary Key
     
     #[getset(get_copy = "pub")]
+    #[serde(alias = "time")]
     date: u64,
 
     #[getset(get_copy = "pub")]
@@ -75,7 +76,7 @@ mod tests {
         let data = r#"
         {
             "hash" : "blocky_hash",
-            "date" : 123456789,
+            "time" : 123456789,
             "height" : 430690,
             "transaction_collection" : [
                 {
