@@ -2,11 +2,11 @@ use serde::{Deserialize, Serialize};
 use named_type_derive::*;
 use named_type::NamedType;
 use devii::devii::FetchFields;
-use getset::{CopyGetters, Getters, MutGetters};
+use getset::{CopyGetters, Getters, MutGetters, Setters};
 
 use crate::common::transaction::{Transaction};
 
-#[derive(Serialize, Deserialize, Debug, Clone, NamedType, Default, Getters, CopyGetters, MutGetters)]
+#[derive(Serialize, Deserialize, Debug, Clone, NamedType, Default, Getters, CopyGetters, MutGetters, Setters)]
 pub struct Block {
     #[getset(get = "pub")]
     hash: String, // Primary Key
@@ -18,7 +18,7 @@ pub struct Block {
     #[getset(get_copy = "pub")]
     height: u64,
     
-    #[getset(get = "pub", get_mut = "pub")]
+    #[getset(get = "pub", get_mut = "pub", set = "pub")]
     #[serde(alias = "transaction_collection")]
     #[serde(rename(serialize = "transaction_collection"))]
     #[serde(default)]
@@ -57,6 +57,16 @@ mod tests {
     fn block_height_test() {
         let block = Block::new("hello_world".to_string(), 123456789, 420);
         assert_eq!(420, block.height());
+    }
+    
+    #[test]
+    fn block_set_transactions_test() {
+        let mut block = Block::new("hello_world".to_string(), 123456789, 420);
+        let tx = Transaction::new("hashy_transaction".to_string(), true, &block);
+        
+        block.set_transactions(vec![tx]);
+        
+        assert_eq!(1, block.transactions().len());
     }
 
     #[test]
