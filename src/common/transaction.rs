@@ -3,13 +3,13 @@ use serde::de::Deserializer;
 use named_type_derive::*;
 use named_type::NamedType;
 use devii::devii::FetchFields;
-use getset::{CopyGetters, Getters};
+use getset::{CopyGetters, Getters, MutGetters};
 
 use crate::common::block::Block;
 
 
 #[allow(dead_code)]
-#[derive(Serialize, Deserialize, Debug, Clone, NamedType, Default, Getters, CopyGetters)]
+#[derive(Serialize, Deserialize, Debug, Clone, NamedType, Default, Getters, CopyGetters, MutGetters)]
 pub struct Transaction {
     #[getset(get = "pub")]
     hash: String, // Primary Key
@@ -28,12 +28,13 @@ pub struct Transaction {
     
     #[getset(get = "pub", get_mut = "pub")]
     #[serde(alias = "transaction_amount_collection")]
+    #[serde(rename(serialize = "transaction_amount_collection"))]
     #[serde(default)]
-    transaction_amounts: Option<Vec<TransactionAmount>>
+    transaction_amounts: Vec<TransactionAmount>
 }
 
 impl Transaction {
-    pub fn new(hash: String, is_coinbase: bool, block: Block) -> Self {
+    pub fn new(hash: String, is_coinbase: bool, block: &Block) -> Self {
         Transaction {
             hash, 
             is_coinbase,
@@ -49,6 +50,7 @@ impl Transaction {
 #[derive(Serialize, Deserialize, Debug, Clone, NamedType, Default, Getters, CopyGetters)]
 pub struct TransactionAmount {
     #[serde(deserialize_with = "deserialize_u64_or_string")]
+    #[serde(skip_serializing_if = "Option::is_none")]
     #[getset(get_copy = "pub")]
     id: Option<u64>, // Primary Key
 
@@ -106,7 +108,7 @@ mod tests {
     #[test]
     fn transaction_get_date_test() {
         let block = Block::new("hello_world".to_string(), 123456789, 420);
-        let transaction = Transaction::new("hashy".to_string(), true, block);
+        let transaction = Transaction::new("hashy".to_string(), true, &block);
 
         assert_eq!(transaction.date(), 123456789);
     }
@@ -114,7 +116,7 @@ mod tests {
     #[test]
     fn transaction_get_hash_test() {
         let block = Block::new("hello_world".to_string(), 123456789, 420);
-        let transaction = Transaction::new("hashy".to_string(), true, block);
+        let transaction = Transaction::new("hashy".to_string(), true, &block);
 
         assert_eq!(transaction.hash(), &"hashy".to_string());
     }
@@ -122,7 +124,7 @@ mod tests {
     #[test]
     fn transaction_get_is_coinbase_test() {
         let block = Block::new("hello_world".to_string(), 123456789, 420);
-        let transaction = Transaction::new("hashy".to_string(), true, block);
+        let transaction = Transaction::new("hashy".to_string(), true, &block);
 
         assert_eq!(transaction.is_coinbase(), true);
     }
@@ -130,7 +132,7 @@ mod tests {
     #[test]
     fn transaction_get_block_hash_test() {
         let block = Block::new("hello_world".to_string(), 123456789, 420);
-        let transaction = Transaction::new("hashy".to_string(), true, block);
+        let transaction = Transaction::new("hashy".to_string(), true, &block);
 
         assert_eq!(transaction.block_hash(), &"hello_world".to_string());
     }
@@ -138,7 +140,7 @@ mod tests {
     #[test]
     fn transaction_get_block_height_test() {
         let block = Block::new("hello_world".to_string(), 123456789, 420);
-        let transaction = Transaction::new("hashy".to_string(), true, block);
+        let transaction = Transaction::new("hashy".to_string(), true, &block);
 
         assert_eq!(transaction.block_height(), 420);
     }
@@ -288,5 +290,17 @@ mod tests {
             println!("{:?}", transaction);
             assert!(false);
         }
+    }
+
+    #[test]
+    fn insert_amount_into_transaction_test() {
+        let mut block = Block::new("hello_world".to_string(), 123456789, 420);
+        let mut transaction = Transaction::new("hashy_transaction".to_string(), true, &block);
+        let transaction_amount = TransactionAmount::new(99.9, "address".to_string(), "hashy_transaction".to_string(), 5);
+
+        let amounts = transaction.transaction_amounts_mut();
+        amounts.push(transaction_amount);
+
+        assert_eq!(1, transaction.transaction_amounts().len());
     }
 }
