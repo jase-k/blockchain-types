@@ -3,13 +3,13 @@ use serde::de::Deserializer;
 use named_type_derive::*;
 use named_type::NamedType;
 use devii::devii::FetchFields;
-use getset::{CopyGetters, Getters, MutGetters};
+use getset::{CopyGetters, Getters, MutGetters, Setters};
 
 use crate::common::block::Block;
 
 
 #[allow(dead_code)]
-#[derive(Serialize, Deserialize, Debug, Clone, NamedType, Default, Getters, CopyGetters, MutGetters)]
+#[derive(Serialize, Deserialize, Debug, Clone, NamedType, Default, Getters, CopyGetters, MutGetters, Setters)]
 pub struct Transaction {
     #[getset(get = "pub")]
     hash: String, // Primary Key
@@ -26,7 +26,7 @@ pub struct Transaction {
     #[getset(get_copy = "pub")]
     block_height: u64,
     
-    #[getset(get = "pub", get_mut = "pub")]
+    #[getset(get = "pub", get_mut = "pub", set = "pub")]
     #[serde(alias = "transaction_amount_collection")]
     #[serde(rename(serialize = "transaction_amount_collection"))]
     #[serde(default)]
@@ -320,6 +320,17 @@ mod tests {
 
         let amounts = transaction.transaction_amounts_mut();
         amounts.push(transaction_amount);
+
+        assert_eq!(1, transaction.transaction_amounts().len());
+    }
+
+    #[test]
+    fn set_transaction_amounts_test() {
+        let mut block = Block::new("hello_world".to_string(), 123456789, 420);
+        let mut transaction = Transaction::new_from_block("hashy_transaction".to_string(), true, &block);
+        let transaction_amount = TransactionAmount::new(99.9, "address".to_string(), "hashy_transaction".to_string(), 5);
+
+        transaction.set_transaction_amounts(vec![transaction_amount]);
 
         assert_eq!(1, transaction.transaction_amounts().len());
     }
