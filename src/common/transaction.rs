@@ -34,7 +34,16 @@ pub struct Transaction {
 }
 
 impl Transaction {
-    pub fn new(hash: String, is_coinbase: bool, block: &Block) -> Self {
+    pub fn new(hash: String, is_coinbase: bool, date: u64, block_hash: String, block_height: u64) -> Self {
+        Transaction {
+            hash,
+            is_coinbase,
+            date,
+            block_hash,
+            block_height
+        }
+    }
+    pub fn new_from_block(hash: String, is_coinbase: bool, block: &Block) -> Self {
         Transaction {
             hash, 
             is_coinbase,
