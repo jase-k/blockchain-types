@@ -62,7 +62,7 @@ mod tests {
     #[test]
     fn block_set_transactions_test() {
         let mut block = Block::new("hello_world".to_string(), 123456789, 420);
-        let tx = Transaction::new("hashy_transaction".to_string(), true, &block);
+        let tx = Transaction::new_from_block("hashy_transaction".to_string(), true, &block);
         
         block.set_transactions(vec![tx]);
         
@@ -72,7 +72,7 @@ mod tests {
     #[test]
     fn block_transaction_test() {
         let mut block = Block::new("hello_world".to_string(), 123456789, 420);
-        let transaction = Transaction::new("hashy_transaction".to_string(), true, &block);
+        let transaction = Transaction::new_from_block("hashy_transaction".to_string(), true, &block);
         
         let transacs = block.transactions_mut();
         transacs.push(transaction);
@@ -126,7 +126,7 @@ mod tests {
         let data = r#"{"hash":"blocky_hash","date":123456789,"height":430690,"transaction_collection":[{"hash":"hashy_transaction","date":123456789,"is_coinbase":true,"block_hash":"blocky_hash","block_height":430690,"transaction_amount_collection":[{"amount":43.98,"address":"hashy_address","transaction_hash":"hashy_transaction","index":42}]}]}"#;
 
         let mut block = Block::new("blocky_hash".to_string(), 123456789, 430690);
-        let mut transaction = Transaction::new("hashy_transaction".to_string(), true, &block);
+        let mut transaction = Transaction::new_from_block("hashy_transaction".to_string(), true, &block);
         let transaction_amount = TransactionAmount::new(43.98, "hashy_address".to_string(), transaction.hash().clone(), 42);
         
         let amounts = transaction.transaction_amounts_mut();

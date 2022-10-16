@@ -40,7 +40,8 @@ impl Transaction {
             is_coinbase,
             date,
             block_hash,
-            block_height
+            block_height,
+            transaction_amounts: vec![]
         }
     }
     pub fn new_from_block(hash: String, is_coinbase: bool, block: &Block) -> Self {
@@ -117,15 +118,25 @@ mod tests {
     #[test]
     fn transaction_get_date_test() {
         let block = Block::new("hello_world".to_string(), 123456789, 420);
-        let transaction = Transaction::new("hashy".to_string(), true, &block);
+        let transaction = Transaction::new_from_block("hashy".to_string(), true, &block);
 
         assert_eq!(transaction.date(), 123456789);
+    }
+    #[test]
+    fn transaction_new_test() {
+        let transaction = Transaction::new("hashy".to_string(), true, 123456789, "hello_world".to_string(), 420);
+
+        assert_eq!(transaction.hash(), &"hashy".to_string());
+        assert_eq!(transaction.is_coinbase(), true);
+        assert_eq!(transaction.block_hash(), &"hello_world".to_string());
+        assert_eq!(transaction.date(), 123456789);
+        assert_eq!(transaction.block_height(), 420);
     }
 
     #[test]
     fn transaction_get_hash_test() {
         let block = Block::new("hello_world".to_string(), 123456789, 420);
-        let transaction = Transaction::new("hashy".to_string(), true, &block);
+        let transaction = Transaction::new_from_block("hashy".to_string(), true, &block);
 
         assert_eq!(transaction.hash(), &"hashy".to_string());
     }
@@ -133,7 +144,7 @@ mod tests {
     #[test]
     fn transaction_get_is_coinbase_test() {
         let block = Block::new("hello_world".to_string(), 123456789, 420);
-        let transaction = Transaction::new("hashy".to_string(), true, &block);
+        let transaction = Transaction::new_from_block("hashy".to_string(), true, &block);
 
         assert_eq!(transaction.is_coinbase(), true);
     }
@@ -141,7 +152,7 @@ mod tests {
     #[test]
     fn transaction_get_block_hash_test() {
         let block = Block::new("hello_world".to_string(), 123456789, 420);
-        let transaction = Transaction::new("hashy".to_string(), true, &block);
+        let transaction = Transaction::new_from_block("hashy".to_string(), true, &block);
 
         assert_eq!(transaction.block_hash(), &"hello_world".to_string());
     }
@@ -149,7 +160,7 @@ mod tests {
     #[test]
     fn transaction_get_block_height_test() {
         let block = Block::new("hello_world".to_string(), 123456789, 420);
-        let transaction = Transaction::new("hashy".to_string(), true, &block);
+        let transaction = Transaction::new_from_block("hashy".to_string(), true, &block);
 
         assert_eq!(transaction.block_height(), 420);
     }
@@ -304,7 +315,7 @@ mod tests {
     #[test]
     fn insert_amount_into_transaction_test() {
         let mut block = Block::new("hello_world".to_string(), 123456789, 420);
-        let mut transaction = Transaction::new("hashy_transaction".to_string(), true, &block);
+        let mut transaction = Transaction::new_from_block("hashy_transaction".to_string(), true, &block);
         let transaction_amount = TransactionAmount::new(99.9, "address".to_string(), "hashy_transaction".to_string(), 5);
 
         let amounts = transaction.transaction_amounts_mut();
