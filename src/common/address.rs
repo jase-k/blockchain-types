@@ -1,7 +1,7 @@
 use serde::{Deserialize, Serialize};
 use named_type_derive::*;
 use named_type::NamedType;
-use devii::devii::FetchFields;
+// use devii::devii::FetchFields;
 
 use crate::common::transaction::{Transaction};
 

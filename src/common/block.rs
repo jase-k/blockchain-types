@@ -1,7 +1,7 @@
 use serde::{Deserialize, Serialize};
 use named_type_derive::*;
 use named_type::NamedType;
-use devii::devii::FetchFields;
+// use devii::devii::FetchFields;
 use getset::{CopyGetters, Getters, MutGetters, Setters};
 
 use crate::common::transaction::{Transaction};
@@ -101,7 +101,8 @@ mod tests {
                             "amount": 43.98,
                             "transaction_hash": "hashy_transaction",
                             "address" : "hashy_address",
-                            "index" : 42
+                            "index" : 42,
+                            "date" : 123456789
                         }
                     ]
                 }
@@ -123,11 +124,11 @@ mod tests {
         // Test Deserialization and Serializations
     #[test]
     fn block_serialize_test() {
-        let data = r#"{"hash":"blocky_hash","date":123456789,"height":430690,"transaction_collection":[{"hash":"hashy_transaction","date":123456789,"is_coinbase":true,"block_hash":"blocky_hash","block_height":430690,"transaction_amount_collection":[{"amount":43.98,"address":"hashy_address","transaction_hash":"hashy_transaction","index":42}]}]}"#;
+        let data = r#"{"hash":"blocky_hash","date":123456789,"height":430690,"transaction_collection":[{"hash":"hashy_transaction","date":123456789,"is_coinbase":true,"block_hash":"blocky_hash","block_height":430690,"transaction_amount_collection":[{"amount":43.98,"address":"hashy_address","transaction_hash":"hashy_transaction","index":42,"date":123456789}]}]}"#;
 
         let mut block = Block::new("blocky_hash".to_string(), 123456789, 430690);
         let mut transaction = Transaction::new_from_block("hashy_transaction".to_string(), true, &block);
-        let transaction_amount = TransactionAmount::new(43.98, "hashy_address".to_string(), transaction.hash().clone(), Some(42));
+        let transaction_amount = TransactionAmount::new(43.98, "hashy_address".to_string(), transaction.hash().clone(), 123456789, Some(42));
         
         let amounts = transaction.transaction_amounts_mut();
         amounts.push(transaction_amount);
