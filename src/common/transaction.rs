@@ -74,11 +74,11 @@ pub struct TransactionAmount {
     transaction_hash: String,
     
     #[getset(get_copy = "pub")]
-    index: u64
+    index: Option<u64>
 }
 
 impl TransactionAmount {
-    pub fn new(amount: f64, address: String, transaction_hash: String, index: u64) -> Self{
+    pub fn new(amount: f64, address: String, transaction_hash: String, index: Option<u64>) -> Self{
         TransactionAmount {
             id: None,
             amount,
@@ -167,37 +167,37 @@ mod tests {
 
     #[test]
     fn transaction_amount_get_id_test() {
-        let transaction_amount = TransactionAmount::new(90.8, "address".to_string(), "transaction_hash".to_string(), 5);
+        let transaction_amount = TransactionAmount::new(90.8, "address".to_string(), "transaction_hash".to_string(), Some(5));
 
         assert_eq!(transaction_amount.id(), None);
     }
 
     #[test]
     fn transaction_amount_get_amount_test() {
-        let transaction_amount = TransactionAmount::new(90.8, "address".to_string(), "transaction_hash".to_string(), 5);
+        let transaction_amount = TransactionAmount::new(90.8, "address".to_string(), "transaction_hash".to_string(), Some(5));
 
         assert_eq!(transaction_amount.amount(), 90.8);
     }
 
     #[test]
     fn transaction_amount_get_address_test() {
-        let transaction_amount = TransactionAmount::new(90.8, "address".to_string(), "transaction_hash".to_string(), 5);
+        let transaction_amount = TransactionAmount::new(90.8, "address".to_string(), "transaction_hash".to_string(), Some(5));
 
         assert_eq!(transaction_amount.address(), &"address".to_string());
     }
 
     #[test]
     fn transaction_amount_get_transaction_hash_test() {
-        let transaction_amount = TransactionAmount::new(90.8, "address".to_string(), "transaction_hash".to_string(), 5);
+        let transaction_amount = TransactionAmount::new(90.8, "address".to_string(), "transaction_hash".to_string(), Some(5));
 
         assert_eq!(transaction_amount.transaction_hash(), &"transaction_hash".to_string());
     }
 
     #[test]
     fn transaction_amount_get_index_test() {
-        let transaction_amount = TransactionAmount::new(90.8, "address".to_string(), "transaction_hash".to_string(), 5);
+        let transaction_amount = TransactionAmount::new(90.8, "address".to_string(), "transaction_hash".to_string(), Some(5));
 
-        assert_eq!(transaction_amount.index(), 5);
+        assert_eq!(transaction_amount.index(), Some(5));
     }
 
     // With some software the primary key is always returned as a string so this is a check to make sure it deserializes back into an u64
@@ -219,7 +219,7 @@ mod tests {
             assert_eq!(43.98, ta.amount());
             assert_eq!(&"hashy_transaction".to_string(), ta.transaction_hash());
             assert_eq!(&"hashy_address".to_string(), ta.address());
-            assert_eq!(42, ta.index());
+            assert_eq!(Some(42), ta.index());
         } else {
             println!("{:?}", transaction_amount);
             assert!(false);
@@ -244,7 +244,7 @@ mod tests {
             assert_eq!(43.98, ta.amount());
             assert_eq!(&"hashy_transaction".to_string(), ta.transaction_hash());
             assert_eq!(&"hashy_address".to_string(), ta.address());
-            assert_eq!(42, ta.index());
+            assert_eq!(Some(42), ta.index());
         } else {
             println!("{:?}", transaction_amount);
             assert!(false);
@@ -316,7 +316,7 @@ mod tests {
     fn insert_amount_into_transaction_test() {
         let mut block = Block::new("hello_world".to_string(), 123456789, 420);
         let mut transaction = Transaction::new_from_block("hashy_transaction".to_string(), true, &block);
-        let transaction_amount = TransactionAmount::new(99.9, "address".to_string(), "hashy_transaction".to_string(), 5);
+        let transaction_amount = TransactionAmount::new(99.9, "address".to_string(), "hashy_transaction".to_string(), Some(5));
 
         let amounts = transaction.transaction_amounts_mut();
         amounts.push(transaction_amount);
@@ -328,7 +328,7 @@ mod tests {
     fn set_transaction_amounts_test() {
         let mut block = Block::new("hello_world".to_string(), 123456789, 420);
         let mut transaction = Transaction::new_from_block("hashy_transaction".to_string(), true, &block);
-        let transaction_amount = TransactionAmount::new(99.9, "address".to_string(), "hashy_transaction".to_string(), 5);
+        let transaction_amount = TransactionAmount::new(99.9, "address".to_string(), "hashy_transaction".to_string(), Some(5));
 
         transaction.set_transaction_amounts(vec![transaction_amount]);
 
