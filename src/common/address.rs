@@ -9,7 +9,7 @@ use getset::{CopyGetters, Getters, MutGetters, Setters};
 use crate::common::transaction::{TransactionAmount};
 
 #[allow(dead_code)]
-#[derive(Deserialize, Debug, Clone, NamedType, Default, Getters, CopyGetters)]
+#[derive(Serialize, Deserialize, Debug, Clone, NamedType, Default, Getters, CopyGetters)]
 pub struct Address {
     #[getset(get = "pub")]
     hash: String, // Primary Key 5 bytes
@@ -20,6 +20,8 @@ pub struct Address {
     #[getset(get_copy = "pub")]
     coin_total: f64, // 8 bytes 
     
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[serde(default)]
     #[getset(get = "pub")]
     file_url: Option<String>, // 7 bytes 
     
@@ -28,7 +30,7 @@ pub struct Address {
     
     // Stored in Blob Storage
     #[getset(get_copy = "pub")]
-    first_transaction: u32,
+    first_transaction: u64,
     
     #[getset(get = "pub")]
     transactions: Vec<TransactionAmount> 
@@ -53,6 +55,10 @@ impl Address {
         }
 
         self.coin_total += tx_amount.amount();
+
+        if self.transactions.len() == 0 {
+            self.first_transaction = tx_amount.date();
+        }
         
         self.transactions.push(tx_amount);
 
@@ -101,5 +107,111 @@ mod tests {
 
         assert_eq!(address.last_transaction(), 987654321);
     }
+    
+    #[test]
+    fn deserialize_test() {
+        let raw = r#"{
+            "hash":"hashy_address",
+            "last_transaction":123456789,
+            "coin_total":10.0,
+            "file_url":"/etc/file.json",
+            "is_miner":true,
+            "first_transaction":111156789,
+            "transactions":[]
+        }"#;
+        let address: Result<Address, serde_json::Error> = serde_json::from_str(raw);
+        if let Ok(a) = address {
+            assert_eq!(a.hash().clone(), "hashy_address".to_string());
+            assert_eq!(a.file_url().clone(), Some("/etc/file.json".to_string()));
+            assert_eq!(a.last_transaction(), 123456789);
+            assert_eq!(a.first_transaction(), 111156789);
+            assert_eq!(a.coin_total(), 10.0);
+            assert_eq!(a.is_miner(), true);
+            assert_eq!(a.transactions(), &vec![]);
+        } else {
+            println!("{:?}", address);
+            assert!(false)
+        }
+    }
+
+    #[test]
+    fn deserialize_with_transactions_test() {
+        let raw = r#"{
+            "hash":"hashy_address",
+            "last_transaction":123456789,
+            "coin_total":10.0,
+            "file_url":"/etc/file.json",
+            "is_miner":true,
+            "first_transaction":111156789,
+            "transactions":[
+                {
+                    "id": 5, 
+                    "amount": 43.98,
+                    "transaction_hash": "hashy_transaction",
+                    "address" : "hashy_address",
+                    "index" : 42,
+                    "date" : 111456789
+                },
+                {
+                    "amount": 3.8,
+                    "transaction_hash": "hashy_transaction2",
+                    "address" : "hashy_address",
+                    "index" : 42,
+                    "date" : 123456789
+                }
+            ]
+        }"#;
+        let address: Result<Address, serde_json::Error> = serde_json::from_str(raw);
+        if let Ok(a) = address {
+            assert_eq!(a.transactions().len(), 2)
+        } else {
+            println!("{:?}", address);
+            assert!(false)
+        }
+    }
+
+    #[test]
+    fn serialize_test() {
+        let raw = r#"{"hash":"hashy_address","last_transaction":0,"coin_total":0.0,"is_miner":false,"first_transaction":0,"transactions":[]}"#;
+        
+        let address = Address::new("hashy_address".to_string());
+
+        let result = serde_json::to_string(&address);
+
+        if let Ok(res) = result {
+            assert_eq!(raw, res)
+        } else {
+            println!("{:?}", result);
+            assert!(false)
+        }      
+    }
+
+    #[test]
+    fn serialize_with_transaction_test() {
+        let raw = r#"{"hash":"hashy_address","last_transaction":123456789,"coin_total":43.98,"is_miner":true,"first_transaction":123456789,"transactions":[{"amount":43.98,"address":"hashy_address","transaction_hash":"hashy_transaction","index":4,"date":123456789}]}"#;
+
+        let tx_amount = TransactionAmount::new(43.98, "hashy_address".to_string(), "hashy_transaction".to_string(), 123456789, Some(4));
+        
+        let mut address = Address::new("hashy_address".to_string());
+        address.add_transaction_amount(tx_amount, true);
+        
+        let result = serde_json::to_string(&address);
+
+        if let Ok(res) = result {
+            assert_eq!(raw, res)
+        } else {
+            println!("{:?}", result);
+            assert!(false)
+        }     
+    }
 }
 
+// Address {   
+//     hash, 
+//     last_transaction: 0, 
+//     coin_total: 0.0, 
+//     file_url: None, 
+//     is_miner: false,
+//     first_transaction: 0,
+//     transactions: Vec::new() 
+// }

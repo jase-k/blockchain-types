@@ -63,6 +63,7 @@ impl Transaction {
 pub struct TransactionAmount {
     #[serde(deserialize_with = "deserialize_u64_or_string")]
     #[serde(skip_serializing_if = "Option::is_none")]
+    #[serde(default)]
     #[getset(get_copy = "pub")]
     id: Option<u64>, // Primary Key
 
