@@ -2,6 +2,8 @@ use serde::{Deserialize, Serialize};
 use serde::de::Deserializer;
 use named_type_derive::*;
 use named_type::NamedType;
+use std::cmp::Ordering;
+
 // use devii::devii::FetchFields;
 use getset::{CopyGetters, Getters, MutGetters, Setters};
 
@@ -112,6 +114,25 @@ pub fn deserialize_u64_or_string<'de, D>(deserializer: D) -> Result<Option<u64>,
         }
     }
 }
+
+impl Ord for TransactionAmount {
+    fn cmp(&self, other: &Self) -> Ordering {
+        self.date.cmp(&other.date)
+    }
+}
+
+impl PartialOrd for TransactionAmount {
+    fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
+        Some(self.cmp(other))
+    }
+}
+
+impl PartialEq for TransactionAmount {
+    fn eq(&self, other: &Self) -> bool {
+        self.date == other.date
+    }
+}
+impl Eq for TransactionAmount {}
 
 #[cfg(test)]
 mod tests {
