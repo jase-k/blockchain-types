@@ -3,7 +3,7 @@ use serde::{Deserialize, Serialize};
 use named_type_derive::*;
 use named_type::NamedType;
 // use devii::devii::FetchFields;
-use getset::{CopyGetters, Getters, MutGetters, Setters};
+use getset::{CopyGetters, Getters};
 
 
 use crate::common::transaction::{TransactionAmount};
@@ -19,11 +19,6 @@ pub struct Address {
     
     #[getset(get_copy = "pub")]
     coin_total: f64, // 8 bytes 
-    
-    #[serde(skip_serializing_if = "Option::is_none")]
-    #[serde(default)]
-    #[getset(get = "pub")]
-    file_url: Option<String>, // 7 bytes 
     
     #[getset(get_copy = "pub")]
     is_miner: bool, // 1 bit
@@ -42,7 +37,6 @@ impl Address {
             hash, 
             last_transaction: 0, 
             coin_total: 0.0, 
-            file_url: None, 
             is_miner: false,
             first_transaction: 0,
             transactions: Vec::new() 
@@ -114,7 +108,6 @@ mod tests {
             "hash":"hashy_address",
             "last_transaction":123456789,
             "coin_total":10.0,
-            "file_url":"/etc/file.json",
             "is_miner":true,
             "first_transaction":111156789,
             "transactions":[]
@@ -122,7 +115,6 @@ mod tests {
         let address: Result<Address, serde_json::Error> = serde_json::from_str(raw);
         if let Ok(a) = address {
             assert_eq!(a.hash().clone(), "hashy_address".to_string());
-            assert_eq!(a.file_url().clone(), Some("/etc/file.json".to_string()));
             assert_eq!(a.last_transaction(), 123456789);
             assert_eq!(a.first_transaction(), 111156789);
             assert_eq!(a.coin_total(), 10.0);
@@ -140,7 +132,6 @@ mod tests {
             "hash":"hashy_address",
             "last_transaction":123456789,
             "coin_total":10.0,
-            "file_url":"/etc/file.json",
             "is_miner":true,
             "first_transaction":111156789,
             "transactions":[
