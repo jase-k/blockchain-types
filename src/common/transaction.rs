@@ -60,13 +60,7 @@ impl Transaction {
 
 #[allow(dead_code)]
 #[derive(Serialize, Deserialize, Debug, Clone, NamedType, Default, Getters, CopyGetters)]
-pub struct TransactionAmount {
-    #[serde(deserialize_with = "deserialize_u64_or_string")]
-    #[serde(skip_serializing_if = "Option::is_none")]
-    #[serde(default)]
-    #[getset(get_copy = "pub")]
-    id: Option<u64>, // Primary Key
-
+pub struct TransactionAmount { 
     #[getset(get_copy = "pub")]
     amount: f64,
     
@@ -76,17 +70,17 @@ pub struct TransactionAmount {
     #[getset(get = "pub")]
     transaction_hash: String,
     
+    #[serde(deserialize_with = "deserialize_u64_or_string")]
     #[getset(get_copy = "pub")]
-    index: Option<u64>,
+    index: u64,
 
     #[getset(get_copy = "pub")]
     date: u64
 }
 
 impl TransactionAmount {
-    pub fn new(amount: f64, address: String, transaction_hash: String, date: u64, index: Option<u64>) -> Self{
+    pub fn new(amount: f64, address: String, transaction_hash: String, date: u64, index: u64) -> Self{
         TransactionAmount {
-            id: None,
             amount,
             address,
             transaction_hash,
@@ -100,15 +94,15 @@ impl TransactionAmount {
 #[derive(Deserialize)]
 #[serde(untagged)]
 enum StringOrU64 { U64(u64), Str(String) }
-pub fn deserialize_u64_or_string<'de, D>(deserializer: D) -> Result<Option<u64>, D::Error>
+pub fn deserialize_u64_or_string<'de, D>(deserializer: D) -> Result<u64, D::Error>
     where D: Deserializer<'de>
 {
     match StringOrU64::deserialize(deserializer)? {
-        StringOrU64::U64(v) => { Ok(Some(v)) }
+        StringOrU64::U64(v) => { Ok(v) }
         StringOrU64::Str(v) => {
             let res = v.parse::<u64>();
             if let Ok(r) = res {
-                Ok(Some(r))
+                Ok(r)
             } else {
                 Err(serde::de::Error::custom("Can't parse id!"))
             }
@@ -193,13 +187,12 @@ mod tests {
     
     #[test]
     fn transaction_amount_get_tests() {
-        let transaction_amount = TransactionAmount::new(90.8, "address".to_string(), "transaction_hash".to_string(), 123456789, Some(5));
+        let transaction_amount = TransactionAmount::new(90.8, "address".to_string(), "transaction_hash".to_string(), 123456789, 5);
         
-        assert_eq!(transaction_amount.id(), None);
         assert_eq!(transaction_amount.amount(), 90.8);
         assert_eq!(transaction_amount.address(), &"address".to_string());
         assert_eq!(transaction_amount.transaction_hash(), &"transaction_hash".to_string());
-        assert_eq!(transaction_amount.index(), Some(5));
+        assert_eq!(transaction_amount.index(), 5);
         assert_eq!(transaction_amount.date(), 123456789);
     }
 
@@ -208,7 +201,6 @@ mod tests {
     fn transaction_amount_deserialize_test_id_string() {
         let data = r#"
         {
-            "id": "5", 
             "amount": 43.98,
             "transaction_hash": "hashy_transaction",
             "address" : "hashy_address",
@@ -219,11 +211,10 @@ mod tests {
         // Parse the string of data into serde_json::Value.
         let transaction_amount: Result<TransactionAmount, serde_json::Error> = serde_json::from_str(data);
         if let Ok(ta) = transaction_amount {
-            assert_eq!(Some(5), ta.id());
             assert_eq!(43.98, ta.amount());
             assert_eq!(&"hashy_transaction".to_string(), ta.transaction_hash());
             assert_eq!(&"hashy_address".to_string(), ta.address());
-            assert_eq!(Some(42), ta.index());
+            assert_eq!(42, ta.index());
             assert_eq!(ta.date(), 123456789);
         } else {
             println!("{:?}", transaction_amount);
@@ -235,7 +226,6 @@ mod tests {
     fn transaction_amount_deserialize_test_id_u64() {
         let data = r#"
         {
-            "id": 5, 
             "amount": 43.98,
             "transaction_hash": "hashy_transaction",
             "address" : "hashy_address",
@@ -246,11 +236,10 @@ mod tests {
         // Parse the string of data into serde_json::Value.
         let transaction_amount: Result<TransactionAmount, serde_json::Error> = serde_json::from_str(data);
         if let Ok(ta) = transaction_amount {
-            assert_eq!(Some(5), ta.id());
             assert_eq!(43.98, ta.amount());
             assert_eq!(&"hashy_transaction".to_string(), ta.transaction_hash());
             assert_eq!(&"hashy_address".to_string(), ta.address());
-            assert_eq!(Some(42), ta.index());
+            assert_eq!(42, ta.index());
             assert_eq!(ta.date(), 123456789);
         } else {
             println!("{:?}", transaction_amount);
@@ -322,9 +311,9 @@ mod tests {
 
     #[test]
     fn insert_amount_into_transaction_test() {
-        let mut block = Block::new("hello_world".to_string(), 123456789, 420);
+        let block = Block::new("hello_world".to_string(), 123456789, 420);
         let mut transaction = Transaction::new_from_block("hashy_transaction".to_string(), true, &block);
-        let transaction_amount = TransactionAmount::new(99.9, "address".to_string(), "hashy_transaction".to_string(), 123456789, Some(5));
+        let transaction_amount = TransactionAmount::new(99.9, "address".to_string(), "hashy_transaction".to_string(), 123456789, 5);
 
         let amounts = transaction.transaction_amounts_mut();
         amounts.push(transaction_amount);
@@ -334,9 +323,9 @@ mod tests {
 
     #[test]
     fn set_transaction_amounts_test() {
-        let mut block = Block::new("hello_world".to_string(), 123456789, 420);
+        let block = Block::new("hello_world".to_string(), 123456789, 420);
         let mut transaction = Transaction::new_from_block("hashy_transaction".to_string(), true, &block);
-        let transaction_amount = TransactionAmount::new(99.9, "address".to_string(), "hashy_transaction".to_string(), 123456789, Some(5));
+        let transaction_amount = TransactionAmount::new(99.9, "address".to_string(), "hashy_transaction".to_string(), 123456789, 5);
 
         transaction.set_transaction_amounts(vec![transaction_amount]);
 

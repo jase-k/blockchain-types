@@ -128,7 +128,7 @@ mod tests {
 
         let mut block = Block::new("blocky_hash".to_string(), 123456789, 430690);
         let mut transaction = Transaction::new_from_block("hashy_transaction".to_string(), true, &block);
-        let transaction_amount = TransactionAmount::new(43.98, "hashy_address".to_string(), transaction.hash().clone(), 123456789, Some(42));
+        let transaction_amount = TransactionAmount::new(43.98, "hashy_address".to_string(), transaction.hash().clone(), 123456789, 42);
         
         let amounts = transaction.transaction_amounts_mut();
         amounts.push(transaction_amount);
