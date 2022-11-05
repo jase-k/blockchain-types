@@ -4,6 +4,7 @@ use named_type_derive::*;
 use named_type::NamedType;
 // use devii::devii::FetchFields;
 use getset::{CopyGetters, Getters};
+use chrono::{Utc};
 
 
 use crate::common::transaction::{TransactionAmount};
@@ -28,6 +29,9 @@ pub struct Address {
     first_transaction: u64,
     
     #[getset(get = "pub")]
+    last_updated: String,
+
+    #[getset(get = "pub")]
     transactions: Vec<TransactionAmount> 
 }
 
@@ -39,6 +43,7 @@ impl Address {
             coin_total: 0.0, 
             is_miner: false,
             first_transaction: 0,
+            last_updated: Utc::now().to_string(),
             transactions: Vec::new() 
         }
     }
@@ -110,6 +115,7 @@ mod tests {
             "coin_total":10.0,
             "is_miner":true,
             "first_transaction":111156789,
+            "last_updated" : "2022-11-05T10:26:52.348613688Z",
             "transactions":[]
         }"#;
         let address: Result<Address, serde_json::Error> = serde_json::from_str(raw);
@@ -119,6 +125,7 @@ mod tests {
             assert_eq!(a.first_transaction(), 111156789);
             assert_eq!(a.coin_total(), 10.0);
             assert_eq!(a.is_miner(), true);
+            assert_eq!(a.last_updated(), &"2022-11-05T10:26:52.348613688Z");
             assert_eq!(a.transactions(), &vec![]);
         } else {
             println!("{:?}", address);
@@ -127,44 +134,11 @@ mod tests {
     }
 
     #[test]
-    fn deserialize_with_transactions_test() {
-        let raw = r#"{
-            "hash":"hashy_address",
-            "last_transaction":123456789,
-            "coin_total":10.0,
-            "is_miner":true,
-            "first_transaction":111156789,
-            "transactions":[
-                {
-                    "amount": 43.98,
-                    "transaction_hash": "hashy_transaction",
-                    "address" : "hashy_address",
-                    "index" : 42,
-                    "date" : 111456789
-                },
-                {
-                    "amount": 3.8,
-                    "transaction_hash": "hashy_transaction2",
-                    "address" : "hashy_address",
-                    "index" : 42,
-                    "date" : 123456789
-                }
-            ]
-        }"#;
-        let address: Result<Address, serde_json::Error> = serde_json::from_str(raw);
-        if let Ok(a) = address {
-            assert_eq!(a.transactions().len(), 2)
-        } else {
-            println!("{:?}", address);
-            assert!(false)
-        }
-    }
-
-    #[test]
     fn serialize_test() {
-        let raw = r#"{"hash":"hashy_address","last_transaction":0,"coin_total":0.0,"is_miner":false,"first_transaction":0,"transactions":[]}"#;
         
         let address = Address::new("hashy_address".to_string());
+
+        let raw = format!("{{\"hash\":\"hashy_address\",\"last_transaction\":0,\"coin_total\":0.0,\"is_miner\":false,\"first_transaction\":0,\"last_updated\":\"{}\",\"transactions\":[]}}", address.last_updated());
 
         let result = serde_json::to_string(&address);
 
@@ -174,25 +148,6 @@ mod tests {
             println!("{:?}", result);
             assert!(false)
         }      
-    }
-
-    #[test]
-    fn serialize_with_transaction_test() {
-        let raw = r#"{"hash":"hashy_address","last_transaction":123456789,"coin_total":43.98,"is_miner":true,"first_transaction":123456789,"transactions":[{"amount":43.98,"address":"hashy_address","transaction_hash":"hashy_transaction","index":4,"date":123456789}]}"#;
-
-        let tx_amount = TransactionAmount::new(43.98, "hashy_address".to_string(), "hashy_transaction".to_string(), 123456789, 4);
-        
-        let mut address = Address::new("hashy_address".to_string());
-        address.add_transaction_amount(tx_amount, true);
-        
-        let result = serde_json::to_string(&address);
-
-        if let Ok(res) = result {
-            assert_eq!(raw, res)
-        } else {
-            println!("{:?}", result);
-            assert!(false)
-        }     
     }
 }
 

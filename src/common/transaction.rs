@@ -3,6 +3,7 @@ use serde::de::Deserializer;
 use named_type_derive::*;
 use named_type::NamedType;
 use std::cmp::Ordering;
+use chrono::{Utc};
 
 // use devii::devii::FetchFields;
 use getset::{CopyGetters, Getters, MutGetters, Setters};
@@ -28,6 +29,9 @@ pub struct Transaction {
     #[getset(get_copy = "pub")]
     block_height: u64,
     
+    #[getset(get = "pub")]
+    last_updated: String,
+
     #[getset(get = "pub", get_mut = "pub", set = "pub")]
     #[serde(alias = "transaction_amount_collection")]
     #[serde(rename(serialize = "transaction_amount_collection"))]
@@ -43,6 +47,7 @@ impl Transaction {
             date,
             block_hash,
             block_height,
+            last_updated: Utc::now().to_string(),
             transaction_amounts: vec![]
         }
     }
@@ -53,6 +58,7 @@ impl Transaction {
             date : block.date(),
             block_hash: block.hash().clone(),
             block_height: block.height(),
+            last_updated: Utc::now().to_string(),
             transaction_amounts: vec![]
         }
     }
@@ -75,7 +81,10 @@ pub struct TransactionAmount {
     index: u64,
 
     #[getset(get_copy = "pub")]
-    date: u64
+    date: u64,
+
+    #[getset(get = "pub")]
+    last_updated: String
 }
 
 impl TransactionAmount {
@@ -85,7 +94,8 @@ impl TransactionAmount {
             address,
             transaction_hash,
             date,
-            index
+            index,
+            last_updated: Utc::now().to_string()
         }
     }
 }
@@ -133,7 +143,6 @@ impl Eq for TransactionAmount {}
 mod tests {
     use crate::common::transaction::{Transaction, TransactionAmount};
     use crate::common::block::Block;
-    use serde_json;
 
     #[test]
     fn transaction_get_date_test() {
@@ -196,118 +205,7 @@ mod tests {
         assert_eq!(transaction_amount.date(), 123456789);
     }
 
-    // With some software the primary key is always returned as a string so this is a check to make sure it deserializes back into an u64
-    #[test]
-    fn transaction_amount_deserialize_test_id_string() {
-        let data = r#"
-        {
-            "amount": 43.98,
-            "transaction_hash": "hashy_transaction",
-            "address" : "hashy_address",
-            "index" : 42,
-            "date" : 123456789
-        }"#;
 
-        // Parse the string of data into serde_json::Value.
-        let transaction_amount: Result<TransactionAmount, serde_json::Error> = serde_json::from_str(data);
-        if let Ok(ta) = transaction_amount {
-            assert_eq!(43.98, ta.amount());
-            assert_eq!(&"hashy_transaction".to_string(), ta.transaction_hash());
-            assert_eq!(&"hashy_address".to_string(), ta.address());
-            assert_eq!(42, ta.index());
-            assert_eq!(ta.date(), 123456789);
-        } else {
-            println!("{:?}", transaction_amount);
-            assert!(false);
-        }
-    }
-   
-    #[test]
-    fn transaction_amount_deserialize_test_id_u64() {
-        let data = r#"
-        {
-            "amount": 43.98,
-            "transaction_hash": "hashy_transaction",
-            "address" : "hashy_address",
-            "index" : 42,
-            "date" : 123456789
-        }"#;
-
-        // Parse the string of data into serde_json::Value.
-        let transaction_amount: Result<TransactionAmount, serde_json::Error> = serde_json::from_str(data);
-        if let Ok(ta) = transaction_amount {
-            assert_eq!(43.98, ta.amount());
-            assert_eq!(&"hashy_transaction".to_string(), ta.transaction_hash());
-            assert_eq!(&"hashy_address".to_string(), ta.address());
-            assert_eq!(42, ta.index());
-            assert_eq!(ta.date(), 123456789);
-        } else {
-            println!("{:?}", transaction_amount);
-            assert!(false);
-        }
-    }
-
-    #[test]
-    fn transaction_deserialize_test() {
-        let data = r#"
-        {
-            "hash": "hashy_hash", 
-            "date": 123456789,
-            "is_coinbase": false,
-            "block_hash" : "hashy_block",
-            "block_height" : 42069,
-            "transaction_amount_collection" : [
-                {
-                    "id": 5, 
-                    "amount": 43.98,
-                    "transaction_hash": "hashy_transaction",
-                    "address" : "hashy_address",
-                    "index" : 42,
-                    "date" : 123456789
-                }
-            ]
-        }"#;
-
-        // Parse the string of data into serde_json::Value.
-        let transaction: Result<Transaction, serde_json::Error> = serde_json::from_str(data);
-        if let Ok(t) = transaction {
-            assert_eq!(&"hashy_hash".to_string(), t.hash());
-            assert_eq!(123456789, t.date());
-            assert_eq!(false, t.is_coinbase());
-            assert_eq!(&"hashy_block".to_string(), t.block_hash());
-            assert_eq!(42069, t.block_height());
-            assert_eq!(1, t.transaction_amounts().len());
-        } else {
-            println!("{:?}", transaction);
-            assert!(false);
-        }
-    }
-
-    #[test]
-    fn transaction_deserialize_test_no_transaction_amounts() {
-        let data = r#"
-        {
-            "hash": "hashy_hash", 
-            "date": 123456789,
-            "is_coinbase": false,
-            "block_hash" : "hashy_block",
-            "block_height" : 42069
-        }"#;
-
-        // Parse the string of data into serde_json::Value.
-        let transaction: Result<Transaction, serde_json::Error> = serde_json::from_str(data);
-        if let Ok(t) = transaction {
-            assert_eq!(&"hashy_hash".to_string(), t.hash());
-            assert_eq!(123456789, t.date());
-            assert_eq!(false, t.is_coinbase());
-            assert_eq!(&"hashy_block".to_string(), t.block_hash());
-            assert_eq!(42069, t.block_height());
-            assert_eq!(0, t.transaction_amounts().len());
-        } else {
-            println!("{:?}", transaction);
-            assert!(false);
-        }
-    }
 
     #[test]
     fn insert_amount_into_transaction_test() {

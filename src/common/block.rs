@@ -3,6 +3,7 @@ use named_type_derive::*;
 use named_type::NamedType;
 // use devii::devii::FetchFields;
 use getset::{CopyGetters, Getters, MutGetters, Setters};
+use chrono::{Utc};
 
 use crate::common::transaction::{Transaction};
 
@@ -17,6 +18,12 @@ pub struct Block {
 
     #[getset(get_copy = "pub")]
     height: u64,
+
+    #[getset(get_copy = "pub")]
+    is_final: bool,
+
+    #[getset(get = "pub")]
+    last_updated: String,
     
     #[getset(get = "pub", get_mut = "pub", set = "pub")]
     #[serde(alias = "transaction_collection")]
@@ -30,7 +37,9 @@ impl Block {
         Block {
             hash,
             date, 
-            height, 
+            height,
+            is_final: false,
+            last_updated: Utc::now().to_string(),
             transactions: vec![]
         }
     }
@@ -57,6 +66,12 @@ mod tests {
     fn block_height_test() {
         let block = Block::new("hello_world".to_string(), 123456789, 420);
         assert_eq!(420, block.height());
+    }
+    
+    #[test]
+    fn block_is_final_test() {
+        let block = Block::new("hello_world".to_string(), 123456789, 420);
+        assert_eq!(false, block.is_final());
     }
     
     #[test]
@@ -88,6 +103,8 @@ mod tests {
             "hash" : "blocky_hash",
             "time" : 123456789,
             "height" : 430690,
+            "last_updated" : "2022-11-05T10:26:52.348613688Z",
+            "is_final" : false,
             "transaction_collection" : [
                 {
                     "hash": "hashy_hash", 
@@ -95,6 +112,7 @@ mod tests {
                     "is_coinbase": false,
                     "block_hash" : "blocky_hash",
                     "block_height" : 430690,
+                    "last_updated" : "2022-11-05T10:26:52.348613688Z",
                     "transaction_amount_collection" : [
                         {
                             "id": 5, 
@@ -102,7 +120,8 @@ mod tests {
                             "transaction_hash": "hashy_transaction",
                             "address" : "hashy_address",
                             "index" : 42,
-                            "date" : 123456789
+                            "date" : 123456789,
+                            "last_updated" : "2022-11-05T10:26:52.348613688Z"
                         }
                     ]
                 }
@@ -124,11 +143,14 @@ mod tests {
         // Test Deserialization and Serializations
     #[test]
     fn block_serialize_test() {
-        let data = r#"{"hash":"blocky_hash","date":123456789,"height":430690,"transaction_collection":[{"hash":"hashy_transaction","date":123456789,"is_coinbase":true,"block_hash":"blocky_hash","block_height":430690,"transaction_amount_collection":[{"amount":43.98,"address":"hashy_address","transaction_hash":"hashy_transaction","index":42,"date":123456789}]}]}"#;
-
+        
         let mut block = Block::new("blocky_hash".to_string(), 123456789, 430690);
+        
+        
         let mut transaction = Transaction::new_from_block("hashy_transaction".to_string(), true, &block);
         let transaction_amount = TransactionAmount::new(43.98, "hashy_address".to_string(), transaction.hash().clone(), 123456789, 42);
+        
+        let data = format!("{{\"hash\":\"blocky_hash\",\"date\":123456789,\"height\":430690,\"is_final\":false,\"last_updated\":\"{}\",\"transaction_collection\":[{{\"hash\":\"hashy_transaction\",\"date\":123456789,\"is_coinbase\":true,\"block_hash\":\"blocky_hash\",\"block_height\":430690,\"last_updated\":\"{}\",\"transaction_amount_collection\":[{{\"amount\":43.98,\"address\":\"hashy_address\",\"transaction_hash\":\"hashy_transaction\",\"index\":42,\"date\":123456789,\"last_updated\":\"{}\"}}]}}]}}", block.last_updated(), transaction.last_updated(), transaction_amount.last_updated());
         
         let amounts = transaction.transaction_amounts_mut();
         amounts.push(transaction_amount);
