@@ -98,10 +98,10 @@ pub struct TransactionAmount {
     #[getset(get = "pub")]
     transaction_hash: String,
     
-    #[serde(deserialize_with = "deserialize_u64_or_string")]
+    #[serde(deserialize_with = "deserialize_u32_or_string")]
     #[serde(skip_serializing_if = "Option::is_none")]
     #[getset(get_copy = "pub")]
-    index: Option<u64>,
+    index: Option<u32>,
 
     #[getset(get_copy = "pub")]
     date: u64,
@@ -111,7 +111,7 @@ pub struct TransactionAmount {
 }
 
 impl TransactionAmount {
-    pub fn new(amount: f64, address_hash: String, transaction_hash: String, date: u64, index: Option<u64>) -> Self{
+    pub fn new(amount: f64, address_hash: String, transaction_hash: String, date: u64, index: Option<u32>) -> Self{
         TransactionAmount {
             amount,
             address_hash,
@@ -141,14 +141,14 @@ impl DeviiTrait for TransactionAmount {
 // Credit : https://noyez.gitlab.io/post/2018-08-28-serilize-this-or-that-into-u64/
 #[derive(Deserialize)]
 #[serde(untagged)]
-enum StringOrU64 { U64(u64), Str(String) }
-pub fn deserialize_u64_or_string<'de, D>(deserializer: D) -> Result<Option<u64>, D::Error>
+enum StringOrU32 { U32(u32), Str(String) }
+pub fn deserialize_u32_or_string<'de, D>(deserializer: D) -> Result<Option<u32>, D::Error>
     where D: Deserializer<'de>
 {
-    match StringOrU64::deserialize(deserializer)? {
-        StringOrU64::U64(v) => { Ok(Some(v)) }
-        StringOrU64::Str(v) => {
-            let res = v.parse::<u64>();
+    match StringOrU32::deserialize(deserializer)? {
+        StringOrU32::U32(v) => { Ok(Some(v)) }
+        StringOrU32::Str(v) => {
+            let res = v.parse::<u32>();
             if let Ok(r) = res {
                 Ok(Some(r))
             } else {
@@ -234,12 +234,12 @@ mod tests {
     
     #[test]
     fn transaction_amount_get_tests() {
-        let transaction_amount = TransactionAmount::new(90.8, "address".to_string(), "transaction_hash".to_string(), 123456789, 5);
+        let transaction_amount = TransactionAmount::new(90.8, "address".to_string(), "transaction_hash".to_string(), 123456789, Some(5));
         
         assert_eq!(transaction_amount.amount(), 90.8);
         assert_eq!(transaction_amount.address_hash(), &"address".to_string());
         assert_eq!(transaction_amount.transaction_hash(), &"transaction_hash".to_string());
-        assert_eq!(transaction_amount.index(), 5);
+        assert_eq!(transaction_amount.index(), Some(5));
         assert_eq!(transaction_amount.date(), 123456789);
     }
 
@@ -249,7 +249,7 @@ mod tests {
     fn insert_amount_into_transaction_test() {
         let block = Block::new("hello_world".to_string(), 123456789, 420);
         let mut transaction = Transaction::new_from_block("hashy_transaction".to_string(), true, &block);
-        let transaction_amount = TransactionAmount::new(99.9, "address".to_string(), "hashy_transaction".to_string(), 123456789, 5);
+        let transaction_amount = TransactionAmount::new(99.9, "address".to_string(), "hashy_transaction".to_string(), 123456789, Some(5));
 
         let amounts = transaction.transaction_amounts_mut();
         amounts.push(transaction_amount);
@@ -261,7 +261,7 @@ mod tests {
     fn set_transaction_amounts_test() {
         let block = Block::new("hello_world".to_string(), 123456789, 420);
         let mut transaction = Transaction::new_from_block("hashy_transaction".to_string(), true, &block);
-        let transaction_amount = TransactionAmount::new(99.9, "address".to_string(), "hashy_transaction".to_string(), 123456789, 5);
+        let transaction_amount = TransactionAmount::new(99.9, "address".to_string(), "hashy_transaction".to_string(), 123456789, Some(5));
 
         transaction.set_transaction_amounts(vec![transaction_amount]);
 
