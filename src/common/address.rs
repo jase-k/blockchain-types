@@ -5,6 +5,8 @@ use named_type::NamedType;
 // use devii::devii::FetchFields;
 use getset::{CopyGetters, Getters};
 use chrono::{Utc};
+use serde_json::Value;
+use devii::devii::DeviiTrait;
 
 
 use crate::common::transaction::{TransactionAmount};
@@ -74,6 +76,29 @@ impl Address {
             self.transactions.sort_by(|a, b| b.date().cmp(&a.date()));
             let mut iter = self.transactions.iter();
             return iter.next().unwrap().date();
+        }
+    }
+}
+
+impl DeviiTrait for Address {
+    fn fetch_fields() -> String {
+        format!("{{  hash, last_transaction, coin_total, is_miner, first_transaction, last_updated,
+            transactions {{  amount, address_hash, transaction_hash, date, index, last_updated }}  }}")
+    }
+    fn insert_query(&self, param: String) -> String{
+        format!("create_addresses (input: ${} ){{ id }}", param)
+    }
+    fn input_type(&self) -> String {
+        "addressesInput".to_string()
+    }
+    fn graphql_inputs(&self) -> serde_json::Value {
+        let value = serde_json::to_value(&self).unwrap();
+        match value {
+            Value::Object(mut map) => {
+                map.remove_entry("transactions");
+                return Value::Object(map)
+            }, 
+            _ => panic!("Transaction not an Object!"),
         }
     }
 }

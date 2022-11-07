@@ -3,7 +3,7 @@ use serde::Deserializer;
 use std::fmt;
 use named_type_derive::*;
 use named_type::NamedType;
-use devii::devii::FetchFields;
+use devii::devii::DeviiTrait;
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub enum BlockChainStatType {
@@ -205,9 +205,18 @@ impl BlockChainStats {
     }
 }
 
-impl FetchFields for BlockChainStats {
+impl DeviiTrait for BlockChainStats {
     fn fetch_fields() -> String {
         format!("{{ id, blockchain_name, short_description,  time_offset, total_coin_issuance, total_coin_in_circulation, block_height, block_range_start, block_range_end, date_range_start, date_range_end, active_address_total, last_updated, stat_type}}")
+    }
+    fn insert_query(&self, param: String) -> String{
+        format!("create_chain_stats (input: ${} ){{ id }}", param)
+    }
+    fn input_type(&self) -> String {
+        "chain_statsInput".to_string()
+    }
+    fn graphql_inputs(&self) -> serde_json::Value {
+        serde_json::to_value(&self).unwrap()
     }
 }
 

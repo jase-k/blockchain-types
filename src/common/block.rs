@@ -1,7 +1,8 @@
 use serde::{Deserialize, Serialize};
 use named_type_derive::*;
 use named_type::NamedType;
-// use devii::devii::FetchFields;
+use serde_json::Value;
+use devii::devii::DeviiTrait;
 use getset::{CopyGetters, Getters, MutGetters, Setters};
 use chrono::{Utc};
 
@@ -41,6 +42,27 @@ impl Block {
             is_final: false,
             last_updated: Utc::now().to_string(),
             transactions: vec![]
+        }
+    }
+}
+impl DeviiTrait for Block {
+    fn fetch_fields() -> String {
+        format!("{{ hash, date, height, is_final, last_updated, transactions {{ hash, is_coinbase, date, block_hash, block_height, last_updated, transaction_amounts {{ amount, address_hash, transaction_hash, date, index, last_updated }} }} }}")
+    }
+    fn insert_query(&self, param: String) -> String{
+        format!("create_blocks (input: ${} ){{ id }}", param)
+    }
+    fn input_type(&self) -> String {
+        "blocksInput".to_string()
+    }
+    fn graphql_inputs(&self) -> serde_json::Value {
+        let value = serde_json::to_value(&self).unwrap();
+        match value {
+            Value::Object(mut map) => {
+                map.remove_entry("transactions");
+                return Value::Object(map)
+            }, 
+            _ => panic!("Block not an Object!"),
         }
     }
 }
@@ -118,7 +140,7 @@ mod tests {
                             "id": 5, 
                             "amount": 43.98,
                             "transaction_hash": "hashy_transaction",
-                            "address" : "hashy_address",
+                            "address_hash" : "hashy_address",
                             "index" : 42,
                             "date" : 123456789,
                             "last_updated" : "2022-11-05T10:26:52.348613688Z"
@@ -150,7 +172,7 @@ mod tests {
         let mut transaction = Transaction::new_from_block("hashy_transaction".to_string(), true, &block);
         let transaction_amount = TransactionAmount::new(43.98, "hashy_address".to_string(), transaction.hash().clone(), 123456789, 42);
         
-        let data = format!("{{\"hash\":\"blocky_hash\",\"date\":123456789,\"height\":430690,\"is_final\":false,\"last_updated\":\"{}\",\"transaction_collection\":[{{\"hash\":\"hashy_transaction\",\"date\":123456789,\"is_coinbase\":true,\"block_hash\":\"blocky_hash\",\"block_height\":430690,\"last_updated\":\"{}\",\"transaction_amount_collection\":[{{\"amount\":43.98,\"address\":\"hashy_address\",\"transaction_hash\":\"hashy_transaction\",\"index\":42,\"date\":123456789,\"last_updated\":\"{}\"}}]}}]}}", block.last_updated(), transaction.last_updated(), transaction_amount.last_updated());
+        let data = format!("{{\"hash\":\"blocky_hash\",\"date\":123456789,\"height\":430690,\"is_final\":false,\"last_updated\":\"{}\",\"transaction_collection\":[{{\"hash\":\"hashy_transaction\",\"date\":123456789,\"is_coinbase\":true,\"block_hash\":\"blocky_hash\",\"block_height\":430690,\"last_updated\":\"{}\",\"transaction_amount_collection\":[{{\"amount\":43.98,\"address_hash\":\"hashy_address\",\"transaction_hash\":\"hashy_transaction\",\"index\":42,\"date\":123456789,\"last_updated\":\"{}\"}}]}}]}}", block.last_updated(), transaction.last_updated(), transaction_amount.last_updated());
         
         let amounts = transaction.transaction_amounts_mut();
         amounts.push(transaction_amount);

@@ -4,8 +4,8 @@ use named_type_derive::*;
 use named_type::NamedType;
 use std::cmp::Ordering;
 use chrono::{Utc};
-
-// use devii::devii::FetchFields;
+use serde_json::Value;
+use devii::devii::DeviiTrait;
 use getset::{CopyGetters, Getters, MutGetters, Setters};
 
 use crate::common::block::Block;
@@ -64,6 +64,28 @@ impl Transaction {
     }
 }
 
+impl DeviiTrait for Transaction {
+    fn fetch_fields() -> String {
+        format!("{{ hash, is_coinbase, date, block_hash, block_height, last_updated, transaction_amounts {{ amount, address_hash, transaction_hash, date, index, last_updated }} }}")
+    }
+    fn insert_query(&self, param: String) -> String{
+        format!("create_transactions (input: ${} ){{ id }}", param)
+    }
+    fn input_type(&self) -> String {
+        "transactionsInput".to_string()
+    }
+    fn graphql_inputs(&self) -> serde_json::Value {
+        let value = serde_json::to_value(&self).unwrap();
+        match value {
+            Value::Object(mut map) => {
+                map.remove_entry("transaction_amounts");
+                return Value::Object(map)
+            }, 
+            _ => panic!("Transaction not an Object!"),
+        }
+    }
+}
+
 #[allow(dead_code)]
 #[derive(Serialize, Deserialize, Debug, Clone, NamedType, Default, Getters, CopyGetters)]
 pub struct TransactionAmount { 
@@ -71,7 +93,7 @@ pub struct TransactionAmount {
     amount: f64,
     
     #[getset(get = "pub")]
-    address: String, 
+    address_hash: String, 
     
     #[getset(get = "pub")]
     transaction_hash: String,
@@ -88,15 +110,30 @@ pub struct TransactionAmount {
 }
 
 impl TransactionAmount {
-    pub fn new(amount: f64, address: String, transaction_hash: String, date: u64, index: u64) -> Self{
+    pub fn new(amount: f64, address_hash: String, transaction_hash: String, date: u64, index: u64) -> Self{
         TransactionAmount {
             amount,
-            address,
+            address_hash,
             transaction_hash,
             date,
             index,
             last_updated: Utc::now().to_string()
         }
+    }
+}
+
+impl DeviiTrait for TransactionAmount {
+    fn fetch_fields() -> String {
+        format!("{{ amount, address_hash, transaction_hash, date, index, last_updated }}")
+    }
+    fn insert_query(&self, param: String) -> String{
+        format!("create_transaction_amounts (input: ${} ){{ id }}", param)
+    }
+    fn input_type(&self) -> String {
+        "transaction_amountsInput".to_string()
+    }
+    fn graphql_inputs(&self) -> serde_json::Value {
+        serde_json::to_value(&self).unwrap()
     }
 }
 
@@ -199,7 +236,7 @@ mod tests {
         let transaction_amount = TransactionAmount::new(90.8, "address".to_string(), "transaction_hash".to_string(), 123456789, 5);
         
         assert_eq!(transaction_amount.amount(), 90.8);
-        assert_eq!(transaction_amount.address(), &"address".to_string());
+        assert_eq!(transaction_amount.address_hash(), &"address".to_string());
         assert_eq!(transaction_amount.transaction_hash(), &"transaction_hash".to_string());
         assert_eq!(transaction_amount.index(), 5);
         assert_eq!(transaction_amount.date(), 123456789);
