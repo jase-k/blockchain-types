@@ -99,8 +99,9 @@ pub struct TransactionAmount {
     transaction_hash: String,
     
     #[serde(deserialize_with = "deserialize_u64_or_string")]
+    #[serde(skip_serializing_if = "Option::is_none")]
     #[getset(get_copy = "pub")]
-    index: u64,
+    index: Option<u64>,
 
     #[getset(get_copy = "pub")]
     date: u64,
@@ -110,7 +111,7 @@ pub struct TransactionAmount {
 }
 
 impl TransactionAmount {
-    pub fn new(amount: f64, address_hash: String, transaction_hash: String, date: u64, index: u64) -> Self{
+    pub fn new(amount: f64, address_hash: String, transaction_hash: String, date: u64, index: Option<u64>) -> Self{
         TransactionAmount {
             amount,
             address_hash,
@@ -141,15 +142,15 @@ impl DeviiTrait for TransactionAmount {
 #[derive(Deserialize)]
 #[serde(untagged)]
 enum StringOrU64 { U64(u64), Str(String) }
-pub fn deserialize_u64_or_string<'de, D>(deserializer: D) -> Result<u64, D::Error>
+pub fn deserialize_u64_or_string<'de, D>(deserializer: D) -> Result<Option<u64>, D::Error>
     where D: Deserializer<'de>
 {
     match StringOrU64::deserialize(deserializer)? {
-        StringOrU64::U64(v) => { Ok(v) }
+        StringOrU64::U64(v) => { Ok(Some(v)) }
         StringOrU64::Str(v) => {
             let res = v.parse::<u64>();
             if let Ok(r) = res {
-                Ok(r)
+                Ok(Some(r))
             } else {
                 Err(serde::de::Error::custom("Can't parse id!"))
             }
