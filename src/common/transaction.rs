@@ -179,6 +179,7 @@ impl Eq for TransactionAmount {}
 
 #[cfg(test)]
 mod tests {
+    use devii::devii::DeviiTrait;
     use crate::common::transaction::{Transaction, TransactionAmount};
     use crate::common::block::Block;
 
@@ -266,5 +267,15 @@ mod tests {
         transaction.set_transaction_amounts(vec![transaction_amount]);
 
         assert_eq!(1, transaction.transaction_amounts().len());
+    }
+
+    #[test]
+    fn implements_devii_trait() {
+        let block = Block::new("hello_world".to_string(), 123456789, 420);
+        fn devii<T: DeviiTrait>(o: T) -> () {
+            println!("{:?}", "o");
+        }
+        devii(block);
+        assert!(true)
     }
 }
