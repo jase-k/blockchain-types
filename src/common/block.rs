@@ -50,7 +50,7 @@ impl DeviiTrait for Block {
         format!("{{ hash, date, height, is_final, last_updated, transactions {{ hash, is_coinbase, date, block_hash, block_height, last_updated, transaction_amounts {{ amount, address_hash, transaction_hash, date, index, last_updated }} }} }}")
     }
     fn insert_query(&self, param: String) -> String{
-        format!("create_blocks (input: ${} ){{ height }}", param)
+        format!("create_blocks (input: ${} ){{ hash }}", param)
     }
     fn input_type(&self) -> String {
         "blocksInput".to_string()
