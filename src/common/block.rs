@@ -60,6 +60,7 @@ impl DeviiTrait for Block {
         match value {
             Value::Object(mut map) => {
                 map.remove_entry("transactions");
+                map.remove_entry("transaction_collection");
                 return Value::Object(map)
             }, 
             _ => panic!("Block not an Object!"),
