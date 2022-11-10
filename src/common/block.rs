@@ -4,7 +4,7 @@ use named_type::NamedType;
 use serde_json::Value;
 use devii::devii::DeviiTrait;
 use getset::{CopyGetters, Getters, MutGetters, Setters};
-use chrono::{Utc};
+use chrono::{Utc, SecondsFormat};
 
 use crate::common::transaction::{Transaction};
 
@@ -40,7 +40,7 @@ impl Block {
             date, 
             height,
             is_final: false,
-            last_updated: Utc::now().to_string(),
+            last_updated: Utc::now().to_rfc3339_opts(SecondsFormat::Secs, true),
             transactions: vec![]
         }
     }

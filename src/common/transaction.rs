@@ -3,7 +3,7 @@ use serde::de::Deserializer;
 use named_type_derive::*;
 use named_type::NamedType;
 use std::cmp::Ordering;
-use chrono::{Utc};
+use chrono::{Utc, SecondsFormat};
 use serde_json::Value;
 use devii::devii::DeviiTrait;
 use getset::{CopyGetters, Getters, MutGetters, Setters};
@@ -47,7 +47,7 @@ impl Transaction {
             date,
             block_hash,
             block_height,
-            last_updated: Utc::now().to_string(),
+            last_updated: Utc::now().to_rfc3339_opts(SecondsFormat::Secs, true),
             transaction_amounts: vec![]
         }
     }
@@ -118,7 +118,7 @@ impl TransactionAmount {
             transaction_hash,
             date,
             index,
-            last_updated: Utc::now().to_string()
+            last_updated: Utc::now().to_rfc3339_opts(SecondsFormat::Secs, true)
         }
     }
 }

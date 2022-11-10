@@ -4,7 +4,7 @@ use named_type_derive::*;
 use named_type::NamedType;
 // use devii::devii::FetchFields;
 use getset::{CopyGetters, Getters};
-use chrono::{Utc};
+use chrono::{Utc, SecondsFormat};
 use serde_json::Value;
 use devii::devii::DeviiTrait;
 
@@ -45,7 +45,7 @@ impl Address {
             coin_total: 0.0, 
             is_miner: false,
             first_transaction: 0,
-            last_updated: Utc::now().to_string(),
+            last_updated: Utc::now().to_rfc3339_opts(SecondsFormat::Secs, true),
             transactions: Vec::new() 
         }
     }
