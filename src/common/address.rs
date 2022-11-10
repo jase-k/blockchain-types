@@ -33,8 +33,11 @@ pub struct Address {
     #[getset(get = "pub")]
     last_updated: String,
 
+    needs_update: bool,
+
     #[getset(get = "pub")]
     transactions: Vec<TransactionAmount> 
+
 }
 
 impl Address {
@@ -46,7 +49,8 @@ impl Address {
             is_miner: false,
             first_transaction: 0,
             last_updated: Utc::now().to_rfc3339_opts(SecondsFormat::Secs, true),
-            transactions: Vec::new() 
+            transactions: Vec::new(),
+            needs_update: true
         }
     }
 
@@ -141,6 +145,7 @@ mod tests {
             "is_miner":true,
             "first_transaction":111156789,
             "last_updated" : "2022-11-05T10:26:52.348613688Z",
+            "needs_update":true,
             "transactions":[]
         }"#;
         let address: Result<Address, serde_json::Error> = serde_json::from_str(raw);
@@ -163,7 +168,7 @@ mod tests {
         
         let address = Address::new("hashy_address".to_string());
 
-        let raw = format!("{{\"hash\":\"hashy_address\",\"last_transaction\":0,\"coin_total\":0.0,\"is_miner\":false,\"first_transaction\":0,\"last_updated\":\"{}\",\"transactions\":[]}}", address.last_updated());
+        let raw = format!("{{\"hash\":\"hashy_address\",\"last_transaction\":0,\"coin_total\":0.0,\"is_miner\":false,\"first_transaction\":0,\"last_updated\":\"{}\",\"needs_update\":true,\"transactions\":[]}}", address.last_updated());
 
         let result = serde_json::to_string(&address);
 
