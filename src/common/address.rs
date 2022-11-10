@@ -86,7 +86,7 @@ impl DeviiTrait for Address {
             transactions {{  amount, address_hash, transaction_hash, date, index, last_updated }}  }}")
     }
     fn insert_query(&self, param: String) -> String{
-        format!("create_addresses (input: ${} ){{ id }}", param)
+        format!("create_addresses (input: ${} ){{ hash }}", param)
     }
     fn input_type(&self) -> String {
         "addressesInput".to_string()
