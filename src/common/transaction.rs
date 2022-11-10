@@ -69,7 +69,7 @@ impl DeviiTrait for Transaction {
         format!("{{ hash, is_coinbase, date, block_hash, block_height, last_updated, transaction_amounts {{ amount, address_hash, transaction_hash, date, index, last_updated }} }}")
     }
     fn insert_query(&self, param: String) -> String{
-        format!("create_transactions (input: ${} ){{ id }}", param)
+        format!("create_transactions (input: ${} ){{ hash }}", param)
     }
     fn input_type(&self) -> String {
         "transactionsInput".to_string()
@@ -79,6 +79,7 @@ impl DeviiTrait for Transaction {
         match value {
             Value::Object(mut map) => {
                 map.remove_entry("transaction_amounts");
+                map.remove_entry("transaction_amount_collection");
                 return Value::Object(map)
             }, 
             _ => panic!("Transaction not an Object!"),
@@ -128,7 +129,7 @@ impl DeviiTrait for TransactionAmount {
         format!("{{ amount, address_hash, transaction_hash, date, index, last_updated }}")
     }
     fn insert_query(&self, param: String) -> String{
-        format!("create_transaction_amounts (input: ${} ){{ id }}", param)
+        format!("create_transaction_amounts (input: ${} ){{ hash, index }}", param)
     }
     fn input_type(&self) -> String {
         "transaction_amountsInput".to_string()
