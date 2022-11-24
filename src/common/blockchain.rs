@@ -218,6 +218,9 @@ impl DeviiTrait for BlockChainStats {
     fn graphql_inputs(&self) -> serde_json::Value {
         serde_json::to_value(&self).unwrap()
     }
+    fn delete_input(&self) -> String {
+        format!("id: \"{}\"", self.id().unwrap())
+    }
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]

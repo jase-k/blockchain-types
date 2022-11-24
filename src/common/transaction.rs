@@ -85,6 +85,9 @@ impl DeviiTrait for Transaction {
             _ => panic!("Transaction not an Object!"),
         }
     }
+    fn delete_input(&self) -> String {
+        format!("hash: \"{}\"", self.hash())
+    }
 }
 
 #[allow(dead_code)]
@@ -136,6 +139,9 @@ impl DeviiTrait for TransactionAmount {
     }
     fn graphql_inputs(&self) -> serde_json::Value {
         serde_json::to_value(&self).unwrap()
+    }
+    fn delete_input(&self) -> String {
+        format!("transaction_hash: \"{}\", index: \"{}\"", self.transaction_hash(), self.index().unwrap())
     }
 }
 

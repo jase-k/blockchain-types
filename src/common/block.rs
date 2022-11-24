@@ -66,6 +66,9 @@ impl DeviiTrait for Block {
             _ => panic!("Block not an Object!"),
         }
     }
+    fn delete_input(&self) -> String {
+        format!("hash: \"{}\"", self.hash())
+    }
 }
 
 #[cfg(test)]
