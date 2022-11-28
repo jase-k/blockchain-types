@@ -110,8 +110,11 @@ pub struct TransactionAmount {
     #[getset(get_copy = "pub")]
     date: u64,
 
+    #[getset(get_copy = "pub")]
+    vin_index: i64, 
+
     #[getset(get = "pub")]
-    last_updated: String
+    vin_hash: Option<String>
 }
 
 impl TransactionAmount {
@@ -122,17 +125,18 @@ impl TransactionAmount {
             transaction_hash,
             date,
             index,
-            last_updated: Utc::now().to_rfc3339_opts(SecondsFormat::Secs, true)
+            vin_index: -1,
+            vin_hash: None
         }
     }
 }
 
 impl DeviiTrait for TransactionAmount {
     fn fetch_fields() -> String {
-        format!("{{ amount, address_hash, transaction_hash, date, index, last_updated }}")
+        format!("{{ amount, address_hash, transaction_hash, date, index, vin_index, vin_hash }}")
     }
     fn insert_query(&self, param: String) -> String{
-        format!("create_transaction_amounts (input: ${} ){{ address_hash, index }}", param)
+        format!("create_transaction_amounts (input: ${} ){{ transaction_hash, index, vin_index }}", param)
     }
     fn input_type(&self) -> String {
         "transaction_amountsInput".to_string()
@@ -141,7 +145,7 @@ impl DeviiTrait for TransactionAmount {
         serde_json::to_value(&self).unwrap()
     }
     fn delete_input(&self) -> String {
-        format!("transaction_hash: \"{}\", index: \"{}\"", self.transaction_hash(), self.index().unwrap())
+        format!("transaction_hash: \"{}\", index: \"{}\", vin_index: \"{}\"", self.transaction_hash(), self.index().unwrap(), self.vin_index())
     }
 }
 
