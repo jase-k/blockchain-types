@@ -91,7 +91,7 @@ impl DeviiTrait for Transaction {
 }
 
 #[allow(dead_code)]
-#[derive(Serialize, Deserialize, Debug, Clone, NamedType, Default, Getters, CopyGetters)]
+#[derive(Serialize, Deserialize, Debug, Clone, NamedType, Default, Getters, CopyGetters, Setters)]
 pub struct TransactionAmount { 
     #[getset(get_copy = "pub")]
     amount: f64,
@@ -110,10 +110,10 @@ pub struct TransactionAmount {
     #[getset(get_copy = "pub")]
     date: u64,
 
-    #[getset(get_copy = "pub")]
+    #[getset(get_copy = "pub", set = "pub")]
     vin_index: i64, 
 
-    #[getset(get = "pub")]
+    #[getset(get = "pub", set = "pub")]
     vin_hash: Option<String>
 }
 
@@ -253,6 +253,17 @@ mod tests {
         assert_eq!(transaction_amount.transaction_hash(), &"transaction_hash".to_string());
         assert_eq!(transaction_amount.index(), Some(5));
         assert_eq!(transaction_amount.date(), 123456789);
+    }
+    #[test]
+    fn transaction_amount_set_tests() {
+        let mut transaction_amount = TransactionAmount::new(90.8, "address".to_string(), "transaction_hash".to_string(), 123456789, Some(5));
+
+        transaction_amount.set_vin_index(17);
+        transaction_amount.set_vin_hash(Some("hashy vin".to_string()));
+
+        
+        assert_eq!(transaction_amount.vin_index(), 17);
+        assert_eq!(transaction_amount.vin_hash(), &Some("hashy vin".to_string()));
     }
 
 
