@@ -1,5 +1,6 @@
 use serde::{Deserialize, Serialize};
 use serde::de::Deserializer;
+use serde::Serializer;
 use named_type_derive::*;
 use named_type::NamedType;
 use std::cmp::Ordering;
@@ -103,7 +104,7 @@ pub struct TransactionAmount {
     transaction_hash: String,
     
     #[serde(deserialize_with = "deserialize_u32_or_string")]
-    #[serde(skip_serializing_if = "Option::is_none")]
+    #[serde(serialize_with = "serialize_index")]
     #[getset(get_copy = "pub")]
     index: Option<u32>,
 
@@ -146,6 +147,14 @@ impl DeviiTrait for TransactionAmount {
     }
     fn delete_input(&self) -> String {
         format!("transaction_hash: \"{}\", index: \"{}\", vin_index: \"{}\"", self.transaction_hash(), self.index().unwrap(), self.vin_index())
+    }
+}
+
+fn serialize_index<S>(index: &Option<u32>, serializer: S) -> Result<S::Ok, S::Error> where S: Serializer {
+    if let Some(i) = index {
+        serializer.serialize_u32(*i)
+    } else {
+        serializer.serialize_i32(-1)
     }
 }
 
