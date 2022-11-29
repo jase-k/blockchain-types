@@ -50,10 +50,10 @@ impl DeviiTrait for Block {
         format!("{{ hash, date, height, is_final, last_updated, transaction_collection {{ hash, is_coinbase, date, block_hash, block_height, last_updated, transaction_amount_collection {{ amount, address_hash, transaction_hash, date, index, vin_index, vin_hash }} }} }}")
     }
     fn insert_query(&self, param: String) -> String{
-        format!("create_blocks (input: ${} ){{ hash }}", param)
+        format!("create_block (input: ${} ){{ hash }}", param)
     }
     fn input_type(&self) -> String {
-        "blocksInput".to_string()
+        "blockInput".to_string()
     }
     fn graphql_inputs(&self) -> serde_json::Value {
         let value = serde_json::to_value(&self).unwrap();

@@ -67,19 +67,19 @@ impl Transaction {
 
 impl DeviiTrait for Transaction {
     fn fetch_fields() -> String {
-        format!("{{ hash, is_coinbase, date, block_hash, block_height, last_updated, transaction_amounts {{ amount, address_hash, transaction_hash, date, index, last_updated }} }}")
+        format!("{{ hash, is_coinbase, date, block_hash, block_height, last_updated, transaction_amount_collection {{ amount, address_hash, transaction_hash, date, index, last_updated }} }}")
     }
     fn insert_query(&self, param: String) -> String{
-        format!("create_transactions (input: ${} ){{ hash }}", param)
+        format!("create_transaction (input: ${} ){{ hash }}", param)
     }
     fn input_type(&self) -> String {
-        "transactionsInput".to_string()
+        "transactionInput".to_string()
     }
     fn graphql_inputs(&self) -> serde_json::Value {
         let value = serde_json::to_value(&self).unwrap();
         match value {
             Value::Object(mut map) => {
-                map.remove_entry("transaction_amounts");
+                map.remove_entry("transaction_amount");
                 map.remove_entry("transaction_amount_collection");
                 return Value::Object(map)
             }, 
@@ -139,10 +139,10 @@ impl DeviiTrait for TransactionAmount {
         format!("{{ amount, address_hash, transaction_hash, date, index, vin_index, vin_hash }}")
     }
     fn insert_query(&self, param: String) -> String{
-        format!("create_transaction_amounts (input: ${} ){{ transaction_hash, index, vin_index }}", param)
+        format!("create_transaction_amount (input: ${} ){{ transaction_hash, index, vin_index }}", param)
     }
     fn input_type(&self) -> String {
-        "transaction_amountsInput".to_string()
+        "transaction_amountInput".to_string()
     }
     fn graphql_inputs(&self) -> serde_json::Value {
         serde_json::to_value(&self).unwrap()

@@ -87,13 +87,13 @@ impl Address {
 impl DeviiTrait for Address {
     fn fetch_fields() -> String {
         format!("{{  hash, last_transaction, coin_total, is_miner, first_transaction, last_updated,
-            transactions {{  amount, address_hash, transaction_hash, date, index, last_updated }}  }}")
+            transaction_collection {{  amount, address_hash, transaction_hash, date, index, last_updated }}  }}")
     }
     fn insert_query(&self, param: String) -> String{
-        format!("create_addresses (input: ${} ){{ hash }}", param)
+        format!("create_address (input: ${} ){{ hash }}", param)
     }
     fn input_type(&self) -> String {
-        "addressesInput".to_string()
+        "addressInput".to_string()
     }
     fn graphql_inputs(&self) -> serde_json::Value {
         let value = serde_json::to_value(&self).unwrap();
