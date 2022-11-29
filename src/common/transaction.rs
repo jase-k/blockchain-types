@@ -175,10 +175,12 @@ pub fn deserialize_i32_or_string<'de, D>(deserializer: D) -> Result<Option<u32>,
             }
         }
         StringOrI32::Str(v) => {
-            let res = v.parse::<u32>();
-            if let Ok(r) = res {
+            if let Ok(r) = v.parse::<u32>() {
                 Ok(Some(r))
             } else {
+                if let Ok(_) = v.parse::<i32>() {
+                    return Ok(None);
+                }
                 Err(serde::de::Error::custom("Can't parse id!"))
             }
         }

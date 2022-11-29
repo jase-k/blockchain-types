@@ -159,6 +159,16 @@ mod tests {
                             "date" : 123456789,
                             "vin_index" : 1,
                             "vin_hash" : null
+                        },
+                        {
+                            "id": 5, 
+                            "amount": 43.98,
+                            "transaction_hash": "hashy_transaction",
+                            "address_hash" : "hashy_address",
+                            "index" : "-1",
+                            "date" : 123456789,
+                            "vin_index" : 1,
+                            "vin_hash" : null
                         }
                     ]
                 }
