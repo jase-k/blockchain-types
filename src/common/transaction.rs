@@ -111,8 +111,10 @@ pub struct TransactionAmount {
     #[getset(get_copy = "pub")]
     date: u64,
 
+    #[serde(deserialize_with = "deserialize_i32_or_string")]
+    #[serde(serialize_with = "serialize_index")]
     #[getset(get_copy = "pub", set = "pub")]
-    vin_index: i64, 
+    vin_index: Option<u32>, 
 
     #[getset(get = "pub", set = "pub")]
     vin_hash: Option<String>
@@ -126,7 +128,7 @@ impl TransactionAmount {
             transaction_hash,
             date,
             index,
-            vin_index: -1,
+            vin_index: None,
             vin_hash: None
         }
     }
@@ -146,7 +148,7 @@ impl DeviiTrait for TransactionAmount {
         serde_json::to_value(&self).unwrap()
     }
     fn delete_input(&self) -> String {
-        format!("transaction_hash: \"{}\", index: \"{}\", vin_index: \"{}\"", self.transaction_hash(), self.index().unwrap(), self.vin_index())
+        format!("transaction_hash: \"{}\", index: \"{}\", vin_index: \"{}\"", self.transaction_hash(), self.index().unwrap(), self.vin_index().unwrap())
     }
 }
 
@@ -276,11 +278,11 @@ mod tests {
     fn transaction_amount_set_tests() {
         let mut transaction_amount = TransactionAmount::new(90.8, "address".to_string(), "transaction_hash".to_string(), 123456789, Some(5));
 
-        transaction_amount.set_vin_index(17);
+        transaction_amount.set_vin_index(Some(17));
         transaction_amount.set_vin_hash(Some("hashy vin".to_string()));
 
         
-        assert_eq!(transaction_amount.vin_index(), 17);
+        assert_eq!(transaction_amount.vin_index(), Some(17));
         assert_eq!(transaction_amount.vin_hash(), &Some("hashy vin".to_string()));
     }
 
