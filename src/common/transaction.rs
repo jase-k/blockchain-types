@@ -103,7 +103,7 @@ pub struct TransactionAmount {
     #[getset(get = "pub")]
     transaction_hash: String,
     
-    #[serde(deserialize_with = "deserialize_u32_or_string")]
+    #[serde(deserialize_with = "deserialize_i32_or_string")]
     #[serde(serialize_with = "serialize_index")]
     #[getset(get_copy = "pub")]
     index: Option<u32>,
@@ -161,13 +161,20 @@ fn serialize_index<S>(index: &Option<u32>, serializer: S) -> Result<S::Ok, S::Er
 // Credit : https://noyez.gitlab.io/post/2018-08-28-serilize-this-or-that-into-u64/
 #[derive(Deserialize)]
 #[serde(untagged)]
-enum StringOrU32 { U32(u32), Str(String) }
-pub fn deserialize_u32_or_string<'de, D>(deserializer: D) -> Result<Option<u32>, D::Error>
+enum StringOrI32 { I32(i32), Str(String) }
+pub fn deserialize_i32_or_string<'de, D>(deserializer: D) -> Result<Option<u32>, D::Error>
     where D: Deserializer<'de>
 {
-    match StringOrU32::deserialize(deserializer)? {
-        StringOrU32::U32(v) => { Ok(Some(v)) }
-        StringOrU32::Str(v) => {
+    match StringOrI32::deserialize(deserializer)? {
+        StringOrI32::I32(v) => { 
+            let u32_result = v.try_into();
+            if let Ok(_u32) = u32_result {
+                Ok(Some(_u32)) 
+            } else {
+                Ok(None)
+            }
+        }
+        StringOrI32::Str(v) => {
             let res = v.parse::<u32>();
             if let Ok(r) = res {
                 Ok(Some(r))

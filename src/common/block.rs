@@ -47,7 +47,7 @@ impl Block {
 }
 impl DeviiTrait for Block {
     fn fetch_fields() -> String {
-        format!("{{ hash, date, height, is_final, last_updated, transaction_collection {{ hash, is_coinbase, date, block_hash, block_height, last_updated, transaction_amount_collection {{ amount, address_hash, transaction_hash, date, index }} }} }}")
+        format!("{{ hash, date, height, is_final, last_updated, transaction_collection {{ hash, is_coinbase, date, block_hash, block_height, last_updated, transaction_amount_collection {{ amount, address_hash, transaction_hash, date, index, vin_index, vin_hash }} }} }}")
     }
     fn insert_query(&self, param: String) -> String{
         format!("create_blocks (input: ${} ){{ hash }}", param)
@@ -148,6 +148,16 @@ mod tests {
                             "index" : 42,
                             "date" : 123456789,
                             "vin_index" : -1,
+                            "vin_hash" : null
+                        },
+                        {
+                            "id": 5, 
+                            "amount": 43.98,
+                            "transaction_hash": "hashy_transaction",
+                            "address_hash" : "hashy_address",
+                            "index" : -1,
+                            "date" : 123456789,
+                            "vin_index" : 1,
                             "vin_hash" : null
                         }
                     ]
