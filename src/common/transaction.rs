@@ -8,18 +8,19 @@ use chrono::{Utc, SecondsFormat};
 use serde_json::Value;
 use devii::devii::DeviiTrait;
 use getset::{CopyGetters, Getters, MutGetters, Setters};
+use postgres_types::{ToSql, FromSql};
 
 use crate::common::block::Block;
 
 
 #[allow(dead_code)]
-#[derive(Serialize, Deserialize, Debug, Clone, NamedType, Default, Getters, CopyGetters, MutGetters, Setters)]
+#[derive(Serialize, Deserialize, Debug, Clone, NamedType, Default, Getters, CopyGetters, MutGetters, Setters, ToSql, FromSql)]
 pub struct Transaction {
     #[getset(get = "pub")]
     hash: String, // Primary Key
     
     #[getset(get_copy = "pub")]
-    date: u64,
+    date: i64,
 
     #[getset(get_copy = "pub")]
     is_coinbase: bool, 
@@ -28,7 +29,7 @@ pub struct Transaction {
     block_hash: String,
     
     #[getset(get_copy = "pub")]
-    block_height: u64,
+    block_height: i64,
     
     #[getset(get = "pub")]
     last_updated: String,
@@ -41,7 +42,7 @@ pub struct Transaction {
 }
 
 impl Transaction {
-    pub fn new(hash: String, is_coinbase: bool, date: u64, block_hash: String, block_height: u64) -> Self {
+    pub fn new(hash: String, is_coinbase: bool, date: i64, block_hash: String, block_height: i64) -> Self {
         Transaction {
             hash,
             is_coinbase,
@@ -92,7 +93,7 @@ impl DeviiTrait for Transaction {
 }
 
 #[allow(dead_code)]
-#[derive(Serialize, Deserialize, Debug, Clone, NamedType, Default, Getters, CopyGetters, Setters)]
+#[derive(Serialize, Deserialize, Debug, Clone, NamedType, Default, Getters, CopyGetters, Setters, ToSql, FromSql)]
 pub struct TransactionAmount { 
     #[getset(get_copy = "pub")]
     amount: f64,
@@ -109,7 +110,7 @@ pub struct TransactionAmount {
     index: Option<u32>,
 
     #[getset(get_copy = "pub")]
-    date: u64,
+    date: i64,
 
     #[serde(deserialize_with = "deserialize_i32_or_string")]
     #[serde(serialize_with = "serialize_index")]
@@ -121,7 +122,7 @@ pub struct TransactionAmount {
 }
 
 impl TransactionAmount {
-    pub fn new(amount: f64, address_hash: String, transaction_hash: String, date: u64, index: Option<u32>) -> Self{
+    pub fn new(amount: f64, address_hash: String, transaction_hash: String, date: i64, index: Option<u32>) -> Self{
         TransactionAmount {
             amount,
             address_hash,
@@ -160,7 +161,7 @@ fn serialize_index<S>(index: &Option<u32>, serializer: S) -> Result<S::Ok, S::Er
     }
 }
 
-// Credit : https://noyez.gitlab.io/post/2018-08-28-serilize-this-or-that-into-u64/
+// Credit : https://noyez.gitlab.io/post/2018-08-28-serilize-this-or-that-into-i64/
 #[derive(Deserialize)]
 #[serde(untagged)]
 enum StringOrI32 { I32(i32), Str(String) }

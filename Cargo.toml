@@ -20,6 +20,7 @@ devii = { git = "https://github.com/jase-k/devii.git", branch = "test" }
 getset = "0.1.2"
 sorted-vec = "0.8.0"
 chrono = "0.4.22"
+postgres-types = { version = "0.2.4", features = ["derive"]}
 
 [dev-dependencies]
 serde_json = "1.0.86"

@@ -18,7 +18,7 @@ pub struct Address {
     hash: String, // Primary Key 5 bytes
     
     #[getset(get_copy = "pub")]
-    last_transaction: u64, // 4 bytes
+    last_transaction: i64, // 4 bytes
     
     #[getset(get_copy = "pub")]
     coin_total: f64, // 8 bytes 
@@ -28,7 +28,7 @@ pub struct Address {
     
     // Stored in Blob Storage
     #[getset(get_copy = "pub")]
-    first_transaction: u64,
+    first_transaction: i64,
     
     #[getset(get = "pub")]
     last_updated: String,
@@ -73,7 +73,7 @@ impl Address {
     }
 
     // Private Methods:
-    fn get_latest_transaction(&mut self) -> u64 {
+    fn get_latest_transaction(&mut self) -> i64 {
         if self.transactions.len() < 1 {
             return 0 
         } else {

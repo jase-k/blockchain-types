@@ -5,20 +5,21 @@ use serde_json::Value;
 use devii::devii::DeviiTrait;
 use getset::{CopyGetters, Getters, MutGetters, Setters};
 use chrono::{Utc, SecondsFormat};
+use postgres_types::{ToSql, FromSql};
 
 use crate::common::transaction::{Transaction};
 
-#[derive(Serialize, Deserialize, Debug, Clone, NamedType, Default, Getters, CopyGetters, MutGetters, Setters)]
+#[derive(Serialize, Deserialize, Debug, Clone, NamedType, Default, Getters, CopyGetters, MutGetters, Setters, ToSql, FromSql)]
 pub struct Block {
     #[getset(get = "pub")]
     hash: String, // Primary Key
     
     #[getset(get_copy = "pub")]
     #[serde(alias = "time")]
-    date: u64,
+    date: i64,
 
     #[getset(get_copy = "pub")]
-    height: u64,
+    height: i64,
 
     #[getset(get_copy = "pub")]
     is_final: bool,
@@ -34,7 +35,7 @@ pub struct Block {
 }
 
 impl Block {
-    pub fn new(hash: String, date: u64, height: u64) -> Self {
+    pub fn new(hash: String, date: i64, height: i64) -> Self {
         Block {
             hash,
             date, 
