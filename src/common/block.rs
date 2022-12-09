@@ -196,7 +196,7 @@ mod tests {
         
         
         let mut transaction = Transaction::new_from_block("hashy_transaction".to_string(), true, &block);
-        let transaction_amount = TransactionAmount::new(43.98, "hashy_address".to_string(), transaction.hash().clone(), 123456789, Some(42));
+        let transaction_amount = TransactionAmount::new(43.98, "hashy_address".to_string(), transaction.hash().clone(), 123456789, 42);
         
         let data = format!("{{\"hash\":\"blocky_hash\",\"date\":123456789,\"height\":430690,\"is_final\":false,\"last_updated\":\"{}\",\"transaction_collection\":[{{\"hash\":\"hashy_transaction\",\"date\":123456789,\"is_coinbase\":true,\"block_hash\":\"blocky_hash\",\"block_height\":430690,\"last_updated\":\"{}\",\"transaction_amount_collection\":[{{\"amount\":43.98,\"address_hash\":\"hashy_address\",\"transaction_hash\":\"hashy_transaction\",\"index\":42,\"date\":123456789,\"vin_index\":-1,\"vin_hash\":null}}]}}]}}", block.last_updated(), transaction.last_updated());
         

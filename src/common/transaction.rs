@@ -105,31 +105,29 @@ pub struct TransactionAmount {
     transaction_hash: String,
     
     #[serde(deserialize_with = "deserialize_i32_or_string")]
-    #[serde(serialize_with = "serialize_index")]
     #[getset(get_copy = "pub")]
-    index: Option<i32>,
+    index: i32,
 
     #[getset(get_copy = "pub")]
     date: i64,
 
     #[serde(deserialize_with = "deserialize_i32_or_string")]
-    #[serde(serialize_with = "serialize_index")]
     #[getset(get_copy = "pub", set = "pub")]
-    vin_index: Option<i32>, 
+    vin_index: i32, 
 
     #[getset(get = "pub", set = "pub")]
     vin_hash: Option<String>
 }
 
 impl TransactionAmount {
-    pub fn new(amount: f64, address_hash: String, transaction_hash: String, date: i64, index: Option<i32>) -> Self{
+    pub fn new(amount: f64, address_hash: String, transaction_hash: String, date: i64, index: i32) -> Self{
         TransactionAmount {
             amount,
             address_hash,
             transaction_hash,
             date,
             index,
-            vin_index: None,
+            vin_index: -1,
             vin_hash: None
         }
     }
@@ -149,41 +147,31 @@ impl DeviiTrait for TransactionAmount {
         serde_json::to_value(&self).unwrap()
     }
     fn delete_input(&self) -> String {
-        format!("transaction_hash: \"{}\", index: \"{}\", vin_index: \"{}\"", self.transaction_hash(), self.index().unwrap(), self.vin_index().unwrap())
+        format!("transaction_hash: \"{}\", index: \"{}\", vin_index: \"{}\"", self.transaction_hash(), self.index(), self.vin_index())
     }
 }
 
-fn serialize_index<S>(index: &Option<i32>, serializer: S) -> Result<S::Ok, S::Error> where S: Serializer {
-    if let Some(i) = index {
-        serializer.serialize_i32(*i)
-    } else {
-        serializer.serialize_i32(-1)
-    }
-}
 
 // Credit : https://noyez.gitlab.io/post/2018-08-28-serilize-this-or-that-into-i64/
 #[derive(Deserialize)]
 #[serde(untagged)]
 enum StringOrI32 { I32(i32), Str(String) }
-pub fn deserialize_i32_or_string<'de, D>(deserializer: D) -> Result<Option<i32>, D::Error>
+pub fn deserialize_i32_or_string<'de, D>(deserializer: D) -> Result<i32, D::Error>
     where D: Deserializer<'de>
 {
     match StringOrI32::deserialize(deserializer)? {
         StringOrI32::I32(v) => { 
             let i32_result = v.try_into();
             if let Ok(_i32) = i32_result {
-                Ok(Some(_i32)) 
+                Ok(_i32) 
             } else {
-                Ok(None)
+                Err(serde::de::Error::custom("Can't parse id!"))
             }
         }
         StringOrI32::Str(v) => {
             if let Ok(r) = v.parse::<i32>() {
-                Ok(Some(r))
+                Ok(r)
             } else {
-                if let Ok(_) = v.parse::<i32>() {
-                    return Ok(None);
-                }
                 Err(serde::de::Error::custom("Can't parse id!"))
             }
         }
@@ -267,23 +255,23 @@ mod tests {
     
     #[test]
     fn transaction_amount_get_tests() {
-        let transaction_amount = TransactionAmount::new(90.8, "address".to_string(), "transaction_hash".to_string(), 123456789, Some(5));
+        let transaction_amount = TransactionAmount::new(90.8, "address".to_string(), "transaction_hash".to_string(), 123456789, 5);
         
         assert_eq!(transaction_amount.amount(), 90.8);
         assert_eq!(transaction_amount.address_hash(), &"address".to_string());
         assert_eq!(transaction_amount.transaction_hash(), &"transaction_hash".to_string());
-        assert_eq!(transaction_amount.index(), Some(5));
+        assert_eq!(transaction_amount.index(), 5);
         assert_eq!(transaction_amount.date(), 123456789);
     }
     #[test]
     fn transaction_amount_set_tests() {
-        let mut transaction_amount = TransactionAmount::new(90.8, "address".to_string(), "transaction_hash".to_string(), 123456789, Some(5));
+        let mut transaction_amount = TransactionAmount::new(90.8, "address".to_string(), "transaction_hash".to_string(), 123456789, 5);
 
-        transaction_amount.set_vin_index(Some(17));
+        transaction_amount.set_vin_index(17);
         transaction_amount.set_vin_hash(Some("hashy vin".to_string()));
 
         
-        assert_eq!(transaction_amount.vin_index(), Some(17));
+        assert_eq!(transaction_amount.vin_index(), 17);
         assert_eq!(transaction_amount.vin_hash(), &Some("hashy vin".to_string()));
     }
 
@@ -293,7 +281,7 @@ mod tests {
     fn insert_amount_into_transaction_test() {
         let block = Block::new("hello_world".to_string(), 123456789, 420);
         let mut transaction = Transaction::new_from_block("hashy_transaction".to_string(), true, &block);
-        let transaction_amount = TransactionAmount::new(99.9, "address".to_string(), "hashy_transaction".to_string(), 123456789, Some(5));
+        let transaction_amount = TransactionAmount::new(99.9, "address".to_string(), "hashy_transaction".to_string(), 123456789, 5);
 
         let amounts = transaction.transaction_amounts_mut();
         amounts.push(transaction_amount);
@@ -305,7 +293,7 @@ mod tests {
     fn set_transaction_amounts_test() {
         let block = Block::new("hello_world".to_string(), 123456789, 420);
         let mut transaction = Transaction::new_from_block("hashy_transaction".to_string(), true, &block);
-        let transaction_amount = TransactionAmount::new(99.9, "address".to_string(), "hashy_transaction".to_string(), 123456789, Some(5));
+        let transaction_amount = TransactionAmount::new(99.9, "address".to_string(), "hashy_transaction".to_string(), 123456789, 5);
 
         transaction.set_transaction_amounts(vec![transaction_amount]);
 

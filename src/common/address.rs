@@ -119,7 +119,7 @@ mod tests {
     #[test]
     fn add_transaction_amount_test() {
         let mut address = Address::new("hashy_address".to_string());
-        let transaction_amount = TransactionAmount::new(90.8, "address".to_string(), "transaction_hash".to_string(), 123456789, Some(5));
+        let transaction_amount = TransactionAmount::new(90.8, "address".to_string(), "transaction_hash".to_string(), 123456789, 5);
 
         address.add_transaction_amount(transaction_amount, false); 
 
@@ -129,8 +129,8 @@ mod tests {
     #[test]
     fn add_two_transaction_amount_test() {
         let mut address = Address::new("hashy_address".to_string());
-        let transaction_amount = TransactionAmount::new(90.8, "address".to_string(), "transaction_hash".to_string(), 123456789, Some(5));
-        let transaction_amount2 = TransactionAmount::new(90.8, "address".to_string(), "transaction_hash".to_string(), 987654321, Some(5));
+        let transaction_amount = TransactionAmount::new(90.8, "address".to_string(), "transaction_hash".to_string(), 123456789, 5);
+        let transaction_amount2 = TransactionAmount::new(90.8, "address".to_string(), "transaction_hash".to_string(), 987654321, 5);
 
 
         address.add_transaction_amount(transaction_amount, false); 
