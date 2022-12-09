@@ -107,7 +107,7 @@ pub struct TransactionAmount {
     #[serde(deserialize_with = "deserialize_i32_or_string")]
     #[serde(serialize_with = "serialize_index")]
     #[getset(get_copy = "pub")]
-    index: Option<u32>,
+    index: Option<i32>,
 
     #[getset(get_copy = "pub")]
     date: i64,
@@ -115,14 +115,14 @@ pub struct TransactionAmount {
     #[serde(deserialize_with = "deserialize_i32_or_string")]
     #[serde(serialize_with = "serialize_index")]
     #[getset(get_copy = "pub", set = "pub")]
-    vin_index: Option<u32>, 
+    vin_index: Option<i32>, 
 
     #[getset(get = "pub", set = "pub")]
     vin_hash: Option<String>
 }
 
 impl TransactionAmount {
-    pub fn new(amount: f64, address_hash: String, transaction_hash: String, date: i64, index: Option<u32>) -> Self{
+    pub fn new(amount: f64, address_hash: String, transaction_hash: String, date: i64, index: Option<i32>) -> Self{
         TransactionAmount {
             amount,
             address_hash,
@@ -153,9 +153,9 @@ impl DeviiTrait for TransactionAmount {
     }
 }
 
-fn serialize_index<S>(index: &Option<u32>, serializer: S) -> Result<S::Ok, S::Error> where S: Serializer {
+fn serialize_index<S>(index: &Option<i32>, serializer: S) -> Result<S::Ok, S::Error> where S: Serializer {
     if let Some(i) = index {
-        serializer.serialize_u32(*i)
+        serializer.serialize_i32(*i)
     } else {
         serializer.serialize_i32(-1)
     }
@@ -165,20 +165,20 @@ fn serialize_index<S>(index: &Option<u32>, serializer: S) -> Result<S::Ok, S::Er
 #[derive(Deserialize)]
 #[serde(untagged)]
 enum StringOrI32 { I32(i32), Str(String) }
-pub fn deserialize_i32_or_string<'de, D>(deserializer: D) -> Result<Option<u32>, D::Error>
+pub fn deserialize_i32_or_string<'de, D>(deserializer: D) -> Result<Option<i32>, D::Error>
     where D: Deserializer<'de>
 {
     match StringOrI32::deserialize(deserializer)? {
         StringOrI32::I32(v) => { 
-            let u32_result = v.try_into();
-            if let Ok(_u32) = u32_result {
-                Ok(Some(_u32)) 
+            let i32_result = v.try_into();
+            if let Ok(_i32) = i32_result {
+                Ok(Some(_i32)) 
             } else {
                 Ok(None)
             }
         }
         StringOrI32::Str(v) => {
-            if let Ok(r) = v.parse::<u32>() {
+            if let Ok(r) = v.parse::<i32>() {
                 Ok(Some(r))
             } else {
                 if let Ok(_) = v.parse::<i32>() {
