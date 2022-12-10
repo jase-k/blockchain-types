@@ -3,7 +3,7 @@ use serde::{Deserialize, Serialize};
 use named_type_derive::*;
 use named_type::NamedType;
 // use devii::devii::FetchFields;
-use getset::{CopyGetters, Getters};
+use getset::{CopyGetters, Getters, Setters};
 use chrono::{Utc, SecondsFormat};
 use serde_json::Value;
 use devii::devii::DeviiTrait;
@@ -12,30 +12,30 @@ use devii::devii::DeviiTrait;
 use crate::common::transaction::{TransactionAmount};
 
 #[allow(dead_code)]
-#[derive(Serialize, Deserialize, Debug, Clone, NamedType, Default, Getters, CopyGetters)]
+#[derive(Serialize, Deserialize, Debug, Clone, NamedType, Default, Getters, CopyGetters, Setters)]
 pub struct Address {
     #[getset(get = "pub")]
     hash: String, // Primary Key 5 bytes
     
-    #[getset(get_copy = "pub")]
+    #[getset(get_copy = "pub", set = "pub")]
     last_transaction: i64, // 4 bytes
     
-    #[getset(get_copy = "pub")]
+    #[getset(get_copy = "pub", set = "pub")]
     coin_total: f64, // 8 bytes 
     
-    #[getset(get_copy = "pub")]
+    #[getset(get_copy = "pub", set = "pub")]
     is_miner: bool, // 1 bit
     
-    // Stored in Blob Storage
-    #[getset(get_copy = "pub")]
+    #[getset(get_copy = "pub", set = "pub")]
     first_transaction: i64,
     
-    #[getset(get = "pub")]
+    #[getset(get = "pub", set = "pub")]
     last_updated: String,
 
+    #[getset(get_copy = "pub", set = "pub")]
     needs_update: bool,
 
-    #[getset(get = "pub")]
+    #[getset(get = "pub", set = "pub")]
     transactions: Vec<TransactionAmount> 
 
 }
@@ -181,6 +181,25 @@ mod tests {
             println!("{:?}", result);
             assert!(false)
         }      
+    }
+
+    #[test]
+    fn set_address_test() {
+        let mut address = Address::new("hashy_address".to_string());
+        address.set_last_transaction(123456789);
+        address.set_coin_total(10.0);
+        address.set_is_miner(true);
+        address.set_first_transaction(111156789);
+        address.set_last_updated("2022-11-05T10:26:52.348613688Z".to_string());
+        address.set_needs_update(false);
+
+        assert_eq!(address.hash().clone(), "hashy_address".to_string());
+        assert_eq!(address.last_transaction(), 123456789);
+        assert_eq!(address.coin_total(), 10.0);
+        assert_eq!(address.is_miner(), true);
+        assert_eq!(address.first_transaction(), 111156789);
+        assert_eq!(address.last_updated(), &"2022-11-05T10:26:52.348613688Z");
+        assert_eq!(address.needs_update(), false);
     }
 }
 
