@@ -1,6 +1,6 @@
 use serde::{Deserialize, Serialize};
 use serde::de::Deserializer;
-use serde::Serializer;
+// use serde::Serializer;
 use named_type_derive::*;
 use named_type::NamedType;
 use std::cmp::Ordering;

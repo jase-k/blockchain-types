@@ -7,6 +7,7 @@ use getset::{CopyGetters, Getters, Setters};
 use chrono::{Utc, SecondsFormat};
 use serde_json::Value;
 use devii::devii::DeviiTrait;
+use std::hash::{Hash, Hasher};
 
 
 use crate::common::transaction::{TransactionAmount};
@@ -38,6 +39,19 @@ pub struct Address {
     #[getset(get = "pub", set = "pub")]
     transactions: Vec<TransactionAmount> 
 
+}
+
+impl PartialEq for Address {
+    fn eq(&self, other: &Self) -> bool {
+        self.hash == other.hash
+    }
+}
+impl Eq for Address {}
+
+impl Hash for Address {
+    fn hash<H: Hasher>(&self, state: &mut H) {
+        self.hash.hash(state);
+    }
 }
 
 impl Address {
