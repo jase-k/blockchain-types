@@ -248,3 +248,61 @@ impl fmt::Display for BlockChainNames {
         }
     }
 }
+
+#[allow(dead_code)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
+pub struct BlockChain { 
+    name: String,
+    short_description: String,
+    key: String,
+    decimal_places: u8
+}
+
+impl BlockChain {
+    pub fn new(name: BlockChainNames) -> Self {
+        match name {
+            BlockChainNames::Bitcoin => BlockChain {
+                name: "Bitcoin".to_string(),
+                short_description: "BTC".to_string(),
+                key: "bitcoin".to_string(),
+                decimal_places: 8
+            },
+            BlockChainNames::BitcoinCash => BlockChain {
+                name: "Bitcoin Cash".to_string(),
+                short_description: "BCH".to_string(),
+                key: "bitcoin-cash".to_string(),
+                decimal_places: 8
+            }, 
+            BlockChainNames::Dogecoin => BlockChain {
+                name: "Dogecoin".to_string(),
+                short_description: "DOGE".to_string(),
+                key: "dogecoin".to_string(),
+                decimal_places: 8
+            },
+            BlockChainNames::Litecoin => BlockChain {
+                name: "Litecoin".to_string(),
+                short_description: "LTC".to_string(),
+                key: "litecoin".to_string(),
+                decimal_places: 8
+            },
+            BlockChainNames::Dash => BlockChain {
+                name: "Dash".to_string(),
+                short_description: "DASH".to_string(),
+                key: "dash".to_string(),
+                decimal_places: 8
+            },
+            BlockChainNames::Ethereum => BlockChain {
+                name: "Ethereum".to_string(),
+                short_description: "ETH".to_string(),
+                key: "ethereum".to_string(),
+                decimal_places: 18
+            },
+            BlockChainNames::EthereumClassic => BlockChain {
+                name: "Ethereum Classic".to_string(),
+                short_description: "ETC".to_string(),
+                key: "ethereum-classic".to_string(),
+                decimal_places: 18
+            }
+        }
+    }
+}
