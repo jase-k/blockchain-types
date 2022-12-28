@@ -4,6 +4,9 @@ use std::fmt;
 use named_type_derive::*;
 use named_type::NamedType;
 use devii::devii::DeviiTrait;
+use std::error::Error;
+use easy_error::bail;
+
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub enum BlockChainStatType {
@@ -250,7 +253,7 @@ impl fmt::Display for BlockChainNames {
 }
 
 #[allow(dead_code)]
-#[derive(Serialize, Deserialize, Debug, Clone)]
+#[derive(Serialize, Deserialize, Debug, Clone, PartialEq)]
 pub struct BlockChain { 
     name: String,
     short_description: String,
@@ -304,5 +307,45 @@ impl BlockChain {
                 decimal_places: 18
             }
         }
+    }
+    pub fn new_from_string(name: String) -> Result<Self, Box<dyn Error>> {
+        let mut name = name.to_lowercase();
+        match name.as_str() {
+            "bitcoin" => Ok(BlockChain::new(BlockChainNames::Bitcoin)),
+            "bitcoin-cash" => Ok(BlockChain::new(BlockChainNames::BitcoinCash)),
+            "dogecoin" => Ok(BlockChain::new(BlockChainNames::Dogecoin)),
+            "litecoin" => Ok(BlockChain::new(BlockChainNames::Litecoin)),
+            "dash" => Ok(BlockChain::new(BlockChainNames::Dash)),
+            "ethereum" => Ok(BlockChain::new(BlockChainNames::Ethereum)),
+            "ethereum-classic" => Ok(BlockChain::new(BlockChainNames::EthereumClassic)),
+            _ => bail!("Invalid blockchain name")
+        }
+    }
+}
+
+#[cfg(test)]
+mod test {
+    use super::*;
+
+    #[test]
+    fn test_blockchain_new() {
+        let bitcoin = BlockChain::new(BlockChainNames::Bitcoin);
+        assert_eq!(bitcoin.name, "Bitcoin");
+        assert_eq!(bitcoin.short_description, "BTC");
+        assert_eq!(bitcoin.key, "bitcoin");
+        assert_eq!(bitcoin.decimal_places, 8);
+    }
+    #[test]
+    fn test_blockchain_new_from_string() {
+        let bitcoin = BlockChain::new_from_string("Bitcoin".to_string()).unwrap();
+        assert_eq!(bitcoin.name, "Bitcoin");
+        assert_eq!(bitcoin.short_description, "BTC");
+        assert_eq!(bitcoin.key, "bitcoin");
+        assert_eq!(bitcoin.decimal_places, 8);
+    }
+    #[test]
+    fn test_blockchain_new_from_string_invalid() {
+        let bitcoin = BlockChain::new_from_string("BitcoinCash".to_string());
+        assert!(bitcoin.is_err());
     }
 }
