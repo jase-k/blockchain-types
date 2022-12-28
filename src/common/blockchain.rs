@@ -253,7 +253,7 @@ impl fmt::Display for BlockChainNames {
 }
 
 #[allow(dead_code)]
-#[derive(Serialize, Deserialize, Debug, Clone, PartialEq)]
+#[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Hash)]
 pub struct BlockChain { 
     name: String,
     short_description: String,
