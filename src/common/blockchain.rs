@@ -6,6 +6,7 @@ use named_type::NamedType;
 use devii::devii::DeviiTrait;
 use std::error::Error;
 use easy_error::bail;
+use getset::{CopyGetters, Getters};
 
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
@@ -253,11 +254,15 @@ impl fmt::Display for BlockChainNames {
 }
 
 #[allow(dead_code)]
-#[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Hash)]
+#[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Hash, Getters, CopyGetters)]
 pub struct BlockChain { 
+    #[getset(get = "pub")]
     name: String,
+    #[getset(get = "pub")]
     short_description: String,
+    #[getset(get = "pub")]
     key: String,
+    #[getset(get_copy = "pub")]
     decimal_places: u8
 }
 
