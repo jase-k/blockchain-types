@@ -261,6 +261,8 @@ pub struct BlockChain {
     decimal_places: u8
 }
 
+impl Eq for BlockChain {}
+
 impl BlockChain {
     pub fn new(name: BlockChainNames) -> Self {
         match name {
@@ -309,7 +311,7 @@ impl BlockChain {
         }
     }
     pub fn new_from_string(name: String) -> Result<Self, Box<dyn Error>> {
-        let mut name = name.to_lowercase();
+        let name = name.to_lowercase();
         match name.as_str() {
             "bitcoin" => Ok(BlockChain::new(BlockChainNames::Bitcoin)),
             "bitcoin-cash" => Ok(BlockChain::new(BlockChainNames::BitcoinCash)),
