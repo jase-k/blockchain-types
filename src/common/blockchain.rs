@@ -44,7 +44,7 @@ pub struct ChainStats {
     total_coin_issuance: f64,
 
     #[serde(default = "default_f64")]
-    total_coin_in_circulation: f64,
+    total_active_coins: f64,
     
     #[serde(default = "default_i64")]
     block_height: i64,
@@ -62,7 +62,7 @@ pub struct ChainStats {
     date_range_end:i64,
     
     #[serde(default = "default_i64")]
-    active_address_total: i64,
+    active_addresses: i64,
 
     #[serde(default = "default_i64")]
     last_updated: i64,
@@ -115,13 +115,13 @@ impl ChainStats {
             short_description,     
             time_offset,
             total_coin_issuance : 0.0,
-            total_coin_in_circulation: 0.0,
+            total_active_coins: 0.0,
             block_height: 0,
             block_range_start: 0,
             block_range_end: 0,
             date_range_start: 0,
             date_range_end: 0,
-            active_address_total: 0,
+            active_addresses: 0,
             last_updated: 0,
             stat_type: BlockChainStatType::default(),
         }
@@ -147,8 +147,8 @@ impl ChainStats {
     pub fn last_updated(&self) -> i64 {
         self.last_updated
     }
-    pub fn active_address_total(&self) -> i64 {
-        self.active_address_total
+    pub fn active_addresses(&self) -> i64 {
+        self.active_addresses
     }
     pub fn block_height(&self) -> i64 {
         self.block_height
@@ -159,8 +159,8 @@ impl ChainStats {
     pub fn blockchain_name(&self) -> String {
         self.blockchain_name.clone()
     }
-    pub fn total_coin_in_circulation(&self) -> f64 {
-        self.total_coin_in_circulation
+    pub fn total_active_coins(&self) -> f64 {
+        self.total_active_coins
     }
     pub fn short_description(&self) -> String {
         self.short_description.clone()
@@ -182,8 +182,8 @@ impl ChainStats {
         self.block_range_end = end_block;
         self
     }
-    pub fn update_active_address_total(&mut self, total: i64) -> &mut Self {
-        self.active_address_total = total;
+    pub fn update_active_addresses(&mut self, total: i64) -> &mut Self {
+        self.active_addresses = total;
         self
     }
     pub fn update_block_height(&mut self, height: i64) -> &mut Self {
@@ -204,14 +204,14 @@ impl ChainStats {
 
         self.total_coin_issuance = total_mined;
     }
-    pub fn update_total_coin_in_circulation(&mut self, amount: f64) -> () {
-        self.total_coin_in_circulation = amount;
+    pub fn update_total_active_coins(&mut self, amount: f64) -> () {
+        self.total_active_coins = amount;
     }
 }
 
 impl DeviiTrait for ChainStats {
     fn fetch_fields() -> String {
-        format!("{{ id, blockchain_name, short_description,  time_offset, total_coin_issuance, total_coin_in_circulation, block_height, block_range_start, block_range_end, date_range_start, date_range_end, active_address_total, last_updated, stat_type}}")
+        format!("{{ id, blockchain_name, short_description,  time_offset, total_coin_issuance, total_active_coins, block_height, block_range_start, block_range_end, date_range_start, date_range_end, active_addresses, last_updated, stat_type}}")
     }
     fn insert_query(&self, param: String) -> String{
         format!("create_chain_stats (input: ${} ){{ id }}", param)
