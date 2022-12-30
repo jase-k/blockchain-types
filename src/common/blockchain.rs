@@ -32,7 +32,7 @@ impl std::default::Default for BlockChainStatType {
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone, NamedType, Default)]
-pub struct BlockChainStats {
+pub struct ChainStats {
     #[serde(deserialize_with = "deserialize_i64_or_string")]
     #[serde(skip_serializing)]
     id: Option<i64>,       
@@ -103,13 +103,13 @@ fn default_stat_type() -> BlockChainStatType {
     BlockChainStatType::Default
 }
 
-impl BlockChainStats {
+impl ChainStats {
     pub fn new(
         blockchain_name: BlockChainNames,
         short_description: String,
         time_offset: i64, 
     ) -> Self {
-        BlockChainStats {
+        ChainStats {
             id: None,
             blockchain_name: blockchain_name.to_string(),
             short_description,     
@@ -209,7 +209,7 @@ impl BlockChainStats {
     }
 }
 
-impl DeviiTrait for BlockChainStats {
+impl DeviiTrait for ChainStats {
     fn fetch_fields() -> String {
         format!("{{ id, blockchain_name, short_description,  time_offset, total_coin_issuance, total_coin_in_circulation, block_height, block_range_start, block_range_end, date_range_start, date_range_end, active_address_total, last_updated, stat_type}}")
     }
