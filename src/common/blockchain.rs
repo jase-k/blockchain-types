@@ -204,6 +204,9 @@ impl ChainStats {
 
         self.total_coin_issuance = total_mined;
     }
+    pub fn update_total_coin_issuance(&mut self, amount: f64) -> () {
+        self.total_coin_issuance = amount;
+    }
     pub fn update_total_active_coins(&mut self, amount: f64) -> () {
         self.total_active_coins = amount;
     }
