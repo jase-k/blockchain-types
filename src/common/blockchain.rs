@@ -246,12 +246,12 @@ impl fmt::Display for BlockChainNames {
         // Use `self.number` to refer to each positional data point.
         match self {
             BlockChainNames::Bitcoin => write!(f, "Bitcoin"),
-            BlockChainNames::BitcoinCash => write!(f, "Bitcoin Cash"),
+            BlockChainNames::BitcoinCash => write!(f, "Bitcoin_Cash"),
             BlockChainNames::Dogecoin => write!(f, "Dogecoin"),
             BlockChainNames::Litecoin => write!(f, "Litecoin"),
             BlockChainNames::Dash => write!(f, "Dash"),
             BlockChainNames::Ethereum => write!(f, "Ethereum"),
-            BlockChainNames::EthereumClassic => write!(f, "Ethereum Classic"),
+            BlockChainNames::EthereumClassic => write!(f, "Ethereum_Classic"),
         }
     }
 }
