@@ -363,11 +363,13 @@ impl BlockChain {
         match name.as_str() {
             "bitcoin" => Ok(BlockChain::new(BlockChainNames::Bitcoin)),
             "bitcoin-cash" => Ok(BlockChain::new(BlockChainNames::BitcoinCash)),
+            "bitcoin_cash" => Ok(BlockChain::new(BlockChainNames::BitcoinCash)),
             "dogecoin" => Ok(BlockChain::new(BlockChainNames::Dogecoin)),
             "litecoin" => Ok(BlockChain::new(BlockChainNames::Litecoin)),
             "dash" => Ok(BlockChain::new(BlockChainNames::Dash)),
             "ethereum" => Ok(BlockChain::new(BlockChainNames::Ethereum)),
             "ethereum-classic" => Ok(BlockChain::new(BlockChainNames::EthereumClassic)),
+            "ethereum_classic" => Ok(BlockChain::new(BlockChainNames::EthereumClassic)),
             _ => bail!("Invalid blockchain name")
         }
     }
