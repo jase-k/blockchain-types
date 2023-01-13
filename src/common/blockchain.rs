@@ -1,5 +1,5 @@
 use serde::{Deserialize, Serialize};
-use serde::Deserializer;
+use serde::{Deserializer, Serializer};
 use std::fmt;
 use named_type_derive::*;
 use named_type::NamedType;
@@ -230,7 +230,7 @@ impl DeviiTrait for ChainStats {
     }
 }
 
-#[derive(Serialize, Deserialize, Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 pub enum BlockChainNames {
     Bitcoin,
     BitcoinCash,
@@ -240,6 +240,46 @@ pub enum BlockChainNames {
     Ethereum,
     EthereumClassic
 }
+
+impl <'de>Deserialize<'de> for BlockChainNames{
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+        where D: Deserializer<'de>
+    {
+        match StringOrU64::deserialize(deserializer)? {
+            StringOrU64::U64(v) => { Err(serde::de::Error::custom("Can't blockchainname from U64")) }
+            StringOrU64::Str(v) => {
+                match v.as_str() {
+                    "Bitcoin" => Ok(BlockChainNames::Bitcoin),
+                    "Bitcoin_Cash" => Ok(BlockChainNames::BitcoinCash),
+                    "Dogecoin" => Ok(BlockChainNames::Dogecoin),
+                    "Litecoin" => Ok(BlockChainNames::Litecoin),
+                    "Dash" => Ok(BlockChainNames::Dash),
+                    "Ethereum" => Ok(BlockChainNames::Ethereum),
+                    "Ethereum_Classic" => Ok(BlockChainNames::EthereumClassic),
+                    _ => Err(serde::de::Error::custom("Invalid BlockChainName"))
+                }
+            }
+        }
+    }
+}
+
+impl Serialize for BlockChainNames {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer {
+        match self {
+            BlockChainNames::Bitcoin => serializer.serialize_str("Bitcoin"),
+            BlockChainNames::BitcoinCash => serializer.serialize_str("Bitcoin_Cash"),
+            BlockChainNames::Dogecoin => serializer.serialize_str("Dogecoin"),
+            BlockChainNames::Litecoin => serializer.serialize_str("Litecoin"),
+            BlockChainNames::Dash => serializer.serialize_str("Dash"),
+            BlockChainNames::Ethereum => serializer.serialize_str("Ethereum"),
+            BlockChainNames::EthereumClassic => serializer.serialize_str("Ethereum_Classic"),
+        }
+    }
+}
+
+
 
 impl fmt::Display for BlockChainNames {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
@@ -336,6 +376,7 @@ impl BlockChain {
 #[cfg(test)]
 mod test {
     use super::*;
+    use std::collections::HashMap;
 
     #[test]
     fn test_blockchain_new() {
@@ -357,5 +398,25 @@ mod test {
     fn test_blockchain_new_from_string_invalid() {
         let bitcoin = BlockChain::new_from_string("BitcoinCash".to_string());
         assert!(bitcoin.is_err());
+    }
+    #[test]
+    fn test_serde_blockchain_names() {
+        let name = BlockChainNames::BitcoinCash;
+        let string_name = serde_json::to_string(&name).unwrap();
+        assert_eq!(string_name, "\"Bitcoin_Cash\"".to_string());
+
+        let new_name: BlockChainNames = serde_json::from_str(&string_name).unwrap();
+        assert_eq!(new_name, BlockChainNames::BitcoinCash);
+
+    }
+    #[test]
+    fn test_serde_blockchain_names_eth() {
+        let name = BlockChainNames::EthereumClassic;
+        let string_name = serde_json::to_string(&name).unwrap();
+        assert_eq!(string_name, "\"Ethereum_Classic\"".to_string());
+
+        let new_name: BlockChainNames = serde_json::from_str(&string_name).unwrap();
+        assert_eq!(new_name, BlockChainNames::EthereumClassic);
+
     }
 }
