@@ -45,6 +45,9 @@ pub struct ChainStats {
 
     #[serde(default = "default_f64")]
     total_active_coins: f64,
+
+    #[serde(default = "default_f64")]
+    total_unknown_supply: f64,
     
     #[serde(default = "default_i64")]
     block_height: i64,
@@ -116,6 +119,7 @@ impl ChainStats {
             time_offset,
             total_coin_issuance : 0.0,
             total_active_coins: 0.0,
+            total_unknown_supply: 0.0,
             block_height: 0,
             block_range_start: 0,
             block_range_end: 0,
@@ -161,6 +165,9 @@ impl ChainStats {
     }
     pub fn total_active_coins(&self) -> f64 {
         self.total_active_coins
+    }
+    pub fn total_unknown_supply(&self) -> f64 {
+        self.total_unknown_supply
     }
     pub fn short_description(&self) -> String {
         self.short_description.clone()
@@ -210,11 +217,14 @@ impl ChainStats {
     pub fn update_total_active_coins(&mut self, amount: f64) -> () {
         self.total_active_coins = amount;
     }
+    pub fn update_total_unknown_supply(&mut self, amount: f64) -> () {
+        self.total_unknown_supply = amount;
+    }
 }
 
 impl DeviiTrait for ChainStats {
     fn fetch_fields() -> String {
-        format!("{{ id, blockchain_name, short_description,  time_offset, total_coin_issuance, total_active_coins, block_height, block_range_start, block_range_end, date_range_start, date_range_end, active_addresses, last_updated, stat_type}}")
+        format!("{{ id, blockchain_name, short_description, time_offset, total_coin_issuance, total_active_coins, total_unknown_supply, block_height, block_range_start, block_range_end, date_range_start, date_range_end, active_addresses, last_updated, stat_type}}")
     }
     fn insert_query(&self, param: String) -> String{
         format!("create_chain_stats (input: ${} ){{ id }}", param)
