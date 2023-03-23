@@ -31,7 +31,7 @@ impl std::default::Default for BlockChainStatType {
     }
 }
 
-#[derive(Serialize, Deserialize, Debug, Clone, NamedType, Default)]
+#[derive (Serialize, Deserialize, Debug, Clone, NamedType, Default)]
 pub struct ChainStats {
     #[serde(deserialize_with = "deserialize_i64_or_string")]
     #[serde(skip_serializing)]
@@ -47,7 +47,7 @@ pub struct ChainStats {
     total_active_coins: f64,
 
     #[serde(default = "default_f64")]
-    total_unknown_supply: f64,
+    total_unknown_supply: Option<f64>,
     
     #[serde(default = "default_i64")]
     block_height: i64,
@@ -119,7 +119,7 @@ impl ChainStats {
             time_offset,
             total_coin_issuance : 0.0,
             total_active_coins: 0.0,
-            total_unknown_supply: 0.0,
+            total_unknown_supply: Some(0.0),
             block_height: 0,
             block_range_start: 0,
             block_range_end: 0,
@@ -166,7 +166,7 @@ impl ChainStats {
     pub fn total_active_coins(&self) -> f64 {
         self.total_active_coins
     }
-    pub fn total_unknown_supply(&self) -> f64 {
+    pub fn total_unknown_supply(&self) -> Option<f64> {
         self.total_unknown_supply
     }
     pub fn short_description(&self) -> String {
@@ -217,7 +217,7 @@ impl ChainStats {
     pub fn update_total_active_coins(&mut self, amount: f64) -> () {
         self.total_active_coins = amount;
     }
-    pub fn update_total_unknown_supply(&mut self, amount: f64) -> () {
+    pub fn update_total_unknown_supply(&mut self, amount: Option<f64>) -> () {
         self.total_unknown_supply = amount;
     }
 }
