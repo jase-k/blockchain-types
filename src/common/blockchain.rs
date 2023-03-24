@@ -217,8 +217,8 @@ impl ChainStats {
     pub fn update_total_active_coins(&mut self, amount: f64) -> () {
         self.total_active_coins = amount;
     }
-    pub fn update_total_unknown_supply(&mut self, amount: f64) -> () {
-        self.total_unknown_supply = Some(amount);
+    pub fn update_total_unknown_supply(&mut self, amount: Option<f64>) -> () {
+        self.total_unknown_supply = amount;
     }
 }
 
