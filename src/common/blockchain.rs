@@ -32,7 +32,7 @@ impl std::default::Default for BlockChainStatType {
 }
 
 #[derive (Serialize, Deserialize, Debug, Clone, NamedType, Default)]
-pub struct ChainStats(Option<i64>, String, String, i64, f64, f64, Option<f64>, i64, i64, i64, i64, i64, i64, i64, BlockChainStatType);
+pub struct ChainStats { field1: Option<i64>, field2: String, field3: String, field4: i64, field5: f64, field6: f64, field7: Option<f64>, field8: i64, field9: i64, field10: i64, field11: i64, field12: i64, field13: i64, field14: i64, field15: BlockChainStatType }
 
 #[derive(Deserialize)]
 #[serde(untagged)]
@@ -72,73 +72,73 @@ impl ChainStats {
         short_description: String,
         time_offset: i64, 
     ) -> Self {
-        ChainStats(None, blockchain_name.to_string(), short_description, time_offset, 0.0, 0.0, Some(0.0), 0, 0, 0, 0, 0, 0, 0, BlockChainStatType::default())
+        ChainStats { field1: None, field2: blockchain_name.to_string(), field3: short_description, field4: time_offset, field5: 0.0, field6: 0.0, field7: Some(0.0), field8: 0, field9: 0, field10: 0, field11: 0, field12: 0, field13: 0, field14: 0, field15: BlockChainStatType::default() }
     }
     pub fn block_range_start(&self) -> i64 {
-        self.8
+        self.field9
     }
     pub fn block_range_end(&self) -> i64 {
-        self.9
+        self.field10
     }
     pub fn date_range_start(&self) -> i64 {
-        self.10
+        self.field11
     }
     pub fn date_range_end(&self) -> i64 {
-        self.11
+        self.field12
     }
     pub fn id(&self) -> Option<i64> {
-        self.0
+        self.field1
     }
     pub fn time_offset(&self) -> i64 {
-        self.3
+        self.field4
     }
     pub fn last_updated(&self) -> i64 {
-        self.13
+        self.field14
     }
     pub fn active_addresses(&self) -> i64 {
-        self.12
+        self.field13
     }
     pub fn block_height(&self) -> i64 {
-        self.7
+        self.field8
     }
     pub fn total_coin_issuance(&self) -> f64 {
-        self.4
+        self.field5
     }
     pub fn blockchain_name(&self) -> String {
-        self.1.clone()
+        self.field2.clone()
     }
     pub fn total_active_coins(&self) -> f64 {
-        self.5
+        self.field6
     }
     pub fn total_unknown_supply(&self) -> Option<f64> {
-        self.6
+        self.field7
     }
     pub fn short_description(&self) -> String {
-        self.2.clone()
+        self.field3.clone()
     }
     pub fn stat_type(&self) -> BlockChainStatType {
-        self.14.clone()
+        self.field15.clone()
     }
 
     pub fn update_last_updated(&mut self, time: i64) -> () {
-        self.13 = time;
+        self.field14 = time;
     }
     pub fn update_date_range(&mut self, start_time: i64, end_time: i64) -> &mut Self {
-        self.10 = start_time;
-        self.11 = end_time;
+        self.field11 = start_time;
+        self.field12 = end_time;
         self
     }
     pub fn update_block_range(&mut self, start_block: i64, end_block: i64) -> &mut Self {
-        self.8 = start_block;
-        self.9 = end_block;
+        self.field9 = start_block;
+        self.field10 = end_block;
         self
     }
     pub fn update_active_addresses(&mut self, total: i64) -> &mut Self {
-        self.12 = total;
+        self.field13 = total;
         self
     }
     pub fn update_block_height(&mut self, height: i64) -> &mut Self {
-        self.7 = height;
+        self.field8 = height;
         self
     }
     pub fn update_total_coin_issuance_by_block(&mut self, mut block_height: i64) -> () {
@@ -153,16 +153,16 @@ impl ChainStats {
 
         total_mined += bitcoin_reward * block_height as f64;
 
-        self.4 = total_mined;
+        self.field5 = total_mined;
     }
     pub fn update_total_coin_issuance(&mut self, amount: f64) -> () {
-        self.4 = amount;
+        self.field5 = amount;
     }
     pub fn update_total_active_coins(&mut self, amount: f64) -> () {
-        self.5 = amount;
+        self.field6 = amount;
     }
     pub fn update_total_unknown_supply(&mut self, amount: Option<f64>) -> () {
-        self.6 = amount;
+        self.field7 = amount;
     }
 }
 
