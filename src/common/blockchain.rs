@@ -1,3 +1,4 @@
+use serde::de::{Visitor, self};
 use serde::{Deserialize, Serialize};
 use serde::{Deserializer, Serializer};
 use std::fmt;
@@ -32,13 +33,74 @@ impl std::default::Default for BlockChainStatType {
 }
 
 #[derive (Serialize, Deserialize, Debug, Clone, NamedType, Default)]
-pub struct ChainStats(Option<i64>, String, String, i64, f64, f64, Option<f64>, i64, i64, i64, i64, i64, i64, i64, BlockChainStatType);
+pub struct ChainStats {
+    #[serde(deserialize_with = "deserialize_i64_or_string")]
+    #[serde(skip_serializing)]
+    id: Option<i64>,       
+    blockchain_name: String,
+    short_description: String, // (bitcoin_30_days; bitcoin_90_days, bitcoin_1_year)
+    time_offset: i64, // seconds
+
+    #[serde(default = "default_f64")]
+    total_coin_issuance: f64,
+
+    #[serde(default = "default_f64")]
+    total_active_coins: f64,
+
+    #[serde(default = "default_f64", deserialize_with = "deserialize_option_f64")]
+    total_unknown_supply: Option<f64>,
+    
+    #[serde(default = "default_i64")]
+    block_height: i64,
+
+    #[serde(default = "default_i64")]
+    block_range_start: i64,
+    
+    #[serde(default = "default_i64")]
+    block_range_end: i64,
+    
+    #[serde(default = "default_i64")]
+    date_range_start: i64,
+    
+    #[serde(default = "default_i64")]
+    date_range_end:i64,
+    
+    #[serde(default = "default_i64")]
+    active_addresses: i64,
+
+    #[serde(default = "default_i64")]
+    last_updated: i64,
+    
+    #[serde(default = "default_stat_type")]
+    stat_type: BlockChainStatType,
+}
 
 #[derive(Deserialize)]
 #[serde(untagged)]
+// // ORIGINAL CODE
+// enum StringOrU64 { U64(i64), Str(String) }
+// pub fn deserialize_i64_or_string<'de, D>(deserializer: D) -> Result<Option<i64>, D::Error>
+//     where D: Deserializer<'de>
+// {
+//     match StringOrU64::deserialize(deserializer)? {
+//         StringOrU64::U64(v) => { Ok(Some(v)) }
+//         StringOrU64::Str(v) => {
+//             let res = v.parse::<i64>();
+//             if let Ok(r) = res {
+//                 Ok(Some(r))
+//             } else {
+//                 Err(serde::de::Error::custom("Can't parse id!"))
+//             }
+//         }
+//     }
+// }
+
+// UPDATED MW CODE
 enum StringOrU64 { U64(i64), Str(String) }
+
 pub fn deserialize_i64_or_string<'de, D>(deserializer: D) -> Result<Option<i64>, D::Error>
-    where D: Deserializer<'de>
+where 
+    D: Deserializer<'de>
 {
     match StringOrU64::deserialize(deserializer)? {
         StringOrU64::U64(v) => { Ok(Some(v)) }
@@ -53,6 +115,38 @@ pub fn deserialize_i64_or_string<'de, D>(deserializer: D) -> Result<Option<i64>,
     }
 }
 
+pub fn deserialize_option_f64<'de, D>(deserializer: D) -> Result<Option<f64>, D::Error>
+where 
+    D: Deserializer<'de>
+{
+    struct OptionF64Visitor;
+
+    impl<'de> Visitor<'de> for OptionF64Visitor {
+        type Value = Option<f64>;
+
+        fn expecting(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+            formatter.write_str("an integer or a string")
+        }
+
+        fn visit_i64<E: de::Error>(self, value: i64) -> Result<Option<f64>, E> {
+            Ok(Some(value as f64))
+        }
+
+        fn visit_u64<E: de::Error>(self, value: u64) -> Result<Option<f64>, E> {
+            Ok(Some(value as f64))
+        }
+
+        fn visit_str<E: de::Error>(self, value: &str) -> Result<Option<f64>, E> {
+            match value.parse::<f64>() {
+                Ok(parsed_value) => Ok(Some(parsed_value)),
+                Err(_) => Ok(None),
+            }
+        }
+    }
+
+    deserializer.deserialize_any(OptionF64Visitor)
+}
+
 fn default_f64() -> f64{
     return 0.0
 }
@@ -60,7 +154,6 @@ fn default_f64() -> f64{
 fn default_i64() -> i64{
     return 0
 }
-
 
 fn default_stat_type() -> BlockChainStatType {
     BlockChainStatType::Default
@@ -72,73 +165,89 @@ impl ChainStats {
         short_description: String,
         time_offset: i64, 
     ) -> Self {
-        ChainStats(None, blockchain_name.to_string(), short_description, time_offset, 0.0, 0.0, Some(0.0), 0, 0, 0, 0, 0, 0, 0, BlockChainStatType::default())
+        ChainStats {
+            id: None,
+            blockchain_name: blockchain_name.to_string(),
+            short_description,     
+            time_offset,
+            total_coin_issuance : 0.0,
+            total_active_coins: 0.0,
+            total_unknown_supply: Some(0.0),
+            block_height: 0,
+            block_range_start: 0,
+            block_range_end: 0,
+            date_range_start: 0,
+            date_range_end: 0,
+            active_addresses: 0,
+            last_updated: 0,
+            stat_type: BlockChainStatType::default(),
+        }
     }
     pub fn block_range_start(&self) -> i64 {
-        self.8
+        self.block_range_start
     }
     pub fn block_range_end(&self) -> i64 {
-        self.9
+        self.block_range_end
     }
     pub fn date_range_start(&self) -> i64 {
-        self.10
+        self.date_range_start
     }
     pub fn date_range_end(&self) -> i64 {
-        self.11
+        self.date_range_end
     }
     pub fn id(&self) -> Option<i64> {
-        self.0
+        self.id
     }
     pub fn time_offset(&self) -> i64 {
-        self.3
+        self.time_offset
     }
     pub fn last_updated(&self) -> i64 {
-        self.13
+        self.last_updated
     }
     pub fn active_addresses(&self) -> i64 {
-        self.12
+        self.active_addresses
     }
     pub fn block_height(&self) -> i64 {
-        self.7
+        self.block_height
     }
     pub fn total_coin_issuance(&self) -> f64 {
-        self.4
+        self.total_coin_issuance
     }
     pub fn blockchain_name(&self) -> String {
-        self.1.clone()
+        self.blockchain_name.clone()
     }
     pub fn total_active_coins(&self) -> f64 {
-        self.5
+        self.total_active_coins
     }
     pub fn total_unknown_supply(&self) -> Option<f64> {
-        self.6
+        self.total_unknown_supply
     }
     pub fn short_description(&self) -> String {
-        self.2.clone()
+        self.short_description.clone()
     }
     pub fn stat_type(&self) -> BlockChainStatType {
-        self.14.clone()
+        self.stat_type.clone()
     }
 
     pub fn update_last_updated(&mut self, time: i64) -> () {
-        self.13 = time;
+        self.last_updated = time;
     }
     pub fn update_date_range(&mut self, start_time: i64, end_time: i64) -> &mut Self {
-        self.10 = start_time;
-        self.11 = end_time;
+        self.date_range_start = start_time;
+        self.date_range_end = end_time;
         self
     }
     pub fn update_block_range(&mut self, start_block: i64, end_block: i64) -> &mut Self {
-        self.8 = start_block;
-        self.9 = end_block;
+        self.block_range_start = start_block;
+        self.block_range_end = end_block;
         self
     }
     pub fn update_active_addresses(&mut self, total: i64) -> &mut Self {
-        self.12 = total;
+        self.active_addresses = total;
         self
     }
     pub fn update_block_height(&mut self, height: i64) -> &mut Self {
-        self.7 = height;
+        self.block_height = height;
         self
     }
     pub fn update_total_coin_issuance_by_block(&mut self, mut block_height: i64) -> () {
@@ -153,16 +262,16 @@ impl ChainStats {
 
         total_mined += bitcoin_reward * block_height as f64;
 
-        self.4 = total_mined;
+        self.total_coin_issuance = total_mined;
     }
     pub fn update_total_coin_issuance(&mut self, amount: f64) -> () {
-        self.4 = amount;
+        self.total_coin_issuance = amount;
     }
     pub fn update_total_active_coins(&mut self, amount: f64) -> () {
-        self.5 = amount;
+        self.total_active_coins = amount;
     }
     pub fn update_total_unknown_supply(&mut self, amount: Option<f64>) -> () {
-        self.6 = amount;
+        self.total_unknown_supply = amount;
     }
 }
 
