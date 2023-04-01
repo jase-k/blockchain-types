@@ -303,7 +303,7 @@ mod tests {
     #[test]
     fn implements_devii_trait() {
         let block = Block::new("hello_world".to_string(), 123456789, 420);
-        fn devii<T: DeviiTrait>(o: T) -> () {
+        fn devii<T: DeviiTrait>(_o: T) -> () {
             println!("{:?}", "o");
         }
         devii(block);

@@ -1,14 +1,13 @@
-use serde::de::{Visitor, self};
-use serde::{Deserialize, Serialize};
-use serde::{Deserializer, Serializer};
-use std::fmt;
-use named_type_derive::*;
-use named_type::NamedType;
 use devii::devii::DeviiTrait;
-use std::error::Error;
 use easy_error::bail;
 use getset::{CopyGetters, Getters};
-
+use named_type::NamedType;
+use named_type_derive::*;
+use serde::de::{self, Visitor};
+use serde::{Deserialize, Serialize};
+use serde::{Deserializer, Serializer};
+use std::error::Error;
+use std::fmt;
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub enum BlockChainStatType {
@@ -21,7 +20,7 @@ impl fmt::Display for BlockChainStatType {
         // Use `self.number` to refer to each positional data point.
         match self {
             BlockChainStatType::Default => write!(f, "Default"),
-            BlockChainStatType::Custom => write!(f, "Custom")
+            BlockChainStatType::Custom => write!(f, "Custom"),
         }
     }
 }
@@ -32,14 +31,14 @@ impl std::default::Default for BlockChainStatType {
     }
 }
 
-#[derive (Serialize, Deserialize, Debug, Clone, NamedType, Default)]
+#[derive(Serialize, Deserialize, Debug, Clone, NamedType, Default)]
 pub struct ChainStats {
     #[serde(deserialize_with = "deserialize_i64_or_string")]
     #[serde(skip_serializing)]
-    id: Option<i64>,       
+    id: Option<i64>,
     blockchain_name: String,
     short_description: String, // (bitcoin_30_days; bitcoin_90_days, bitcoin_1_year)
-    time_offset: i64, // seconds
+    time_offset: i64,          // seconds
 
     #[serde(default = "default_f64")]
     total_coin_issuance: f64,
@@ -47,30 +46,30 @@ pub struct ChainStats {
     #[serde(default = "default_f64")]
     total_active_coins: f64,
 
-    #[serde(default = "default_f64", deserialize_with = "deserialize_option_f64")]
-    total_unknown_supply: Option<f64>,
-    
+    #[serde(default = "default_f64")]
+    total_unknown_supply: f64,
+
     #[serde(default = "default_i64")]
     block_height: i64,
 
     #[serde(default = "default_i64")]
     block_range_start: i64,
-    
+
     #[serde(default = "default_i64")]
     block_range_end: i64,
-    
+
     #[serde(default = "default_i64")]
     date_range_start: i64,
-    
+
     #[serde(default = "default_i64")]
-    date_range_end:i64,
-    
+    date_range_end: i64,
+
     #[serde(default = "default_i64")]
     active_addresses: i64,
 
     #[serde(default = "default_i64")]
     last_updated: i64,
-    
+
     #[serde(default = "default_stat_type")]
     stat_type: BlockChainStatType,
 }
@@ -78,9 +77,33 @@ pub struct ChainStats {
 #[derive(Deserialize)]
 #[serde(untagged)]
 // // ORIGINAL CODE
+enum StringOrU64 {
+    U64(i64),
+    Str(String),
+}
+pub fn deserialize_i64_or_string<'de, D>(deserializer: D) -> Result<Option<i64>, D::Error>
+where
+    D: Deserializer<'de>,
+{
+    match StringOrU64::deserialize(deserializer)? {
+        StringOrU64::U64(v) => Ok(Some(v)),
+        StringOrU64::Str(v) => {
+            let res = v.parse::<i64>();
+            if let Ok(r) = res {
+                Ok(Some(r))
+            } else {
+                Err(serde::de::Error::custom("Can't parse id!"))
+            }
+        }
+    }
+}
+
+// // UPDATED MW CODE
 // enum StringOrU64 { U64(i64), Str(String) }
+
 // pub fn deserialize_i64_or_string<'de, D>(deserializer: D) -> Result<Option<i64>, D::Error>
-//     where D: Deserializer<'de>
+// where
+//     D: Deserializer<'de>
 // {
 //     match StringOrU64::deserialize(deserializer)? {
 //         StringOrU64::U64(v) => { Ok(Some(v)) }
@@ -95,29 +118,9 @@ pub struct ChainStats {
 //     }
 // }
 
-// UPDATED MW CODE
-enum StringOrU64 { U64(i64), Str(String) }
-
-pub fn deserialize_i64_or_string<'de, D>(deserializer: D) -> Result<Option<i64>, D::Error>
-where 
-    D: Deserializer<'de>
-{
-    match StringOrU64::deserialize(deserializer)? {
-        StringOrU64::U64(v) => { Ok(Some(v)) }
-        StringOrU64::Str(v) => {
-            let res = v.parse::<i64>();
-            if let Ok(r) = res {
-                Ok(Some(r))
-            } else {
-                Err(serde::de::Error::custom("Can't parse id!"))
-            }
-        }
-    }
-}
-
 pub fn deserialize_option_f64<'de, D>(deserializer: D) -> Result<Option<f64>, D::Error>
-where 
-    D: Deserializer<'de>
+where
+    D: Deserializer<'de>,
 {
     struct OptionF64Visitor;
 
@@ -147,12 +150,12 @@ where
     deserializer.deserialize_any(OptionF64Visitor)
 }
 
-fn default_f64() -> f64{
-    return 0.0
+fn default_f64() -> f64 {
+    return 0.0;
 }
 
-fn default_i64() -> i64{
-    return 0
+fn default_i64() -> i64 {
+    return 0;
 }
 
 fn default_stat_type() -> BlockChainStatType {
@@ -163,16 +166,16 @@ impl ChainStats {
     pub fn new(
         blockchain_name: BlockChainNames,
         short_description: String,
-        time_offset: i64, 
+        time_offset: i64,
     ) -> Self {
         ChainStats {
             id: None,
             blockchain_name: blockchain_name.to_string(),
-            short_description,     
+            short_description,
             time_offset,
-            total_coin_issuance : 0.0,
+            total_coin_issuance: 0.0,
             total_active_coins: 0.0,
-            total_unknown_supply: Some(0.0),
+            total_unknown_supply: 0.0,
             block_height: 0,
             block_range_start: 0,
             block_range_end: 0,
@@ -219,7 +222,7 @@ impl ChainStats {
     pub fn total_active_coins(&self) -> f64 {
         self.total_active_coins
     }
-    pub fn total_unknown_supply(&self) -> Option<f64> {
+    pub fn total_unknown_supply(&self) -> f64 {
         self.total_unknown_supply
     }
     pub fn short_description(&self) -> String {
@@ -270,7 +273,7 @@ impl ChainStats {
     pub fn update_total_active_coins(&mut self, amount: f64) -> () {
         self.total_active_coins = amount;
     }
-    pub fn update_total_unknown_supply(&mut self, amount: Option<f64>) -> () {
+    pub fn update_total_unknown_supply(&mut self, amount: f64) -> () {
         self.total_unknown_supply = amount;
     }
 }
@@ -279,7 +282,7 @@ impl DeviiTrait for ChainStats {
     fn fetch_fields() -> String {
         format!("{{ id, blockchain_name, short_description, time_offset, total_coin_issuance, total_active_coins, total_unknown_supply, block_height, block_range_start, block_range_end, date_range_start, date_range_end, active_addresses, last_updated, stat_type}}")
     }
-    fn insert_query(&self, param: String) -> String{
+    fn insert_query(&self, param: String) -> String {
         format!("create_chain_stats (input: ${} ){{ id }}", param)
     }
     fn input_type(&self) -> String {
@@ -301,27 +304,26 @@ pub enum BlockChainNames {
     Litecoin,
     Dash,
     Ethereum,
-    EthereumClassic
+    EthereumClassic,
 }
 
-impl <'de>Deserialize<'de> for BlockChainNames{
+impl<'de> Deserialize<'de> for BlockChainNames {
     fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
-        where D: Deserializer<'de>
+    where
+        D: Deserializer<'de>,
     {
         match StringOrU64::deserialize(deserializer)? {
-            StringOrU64::U64(v) => { Err(serde::de::Error::custom("Can't blockchainname from U64")) }
-            StringOrU64::Str(v) => {
-                match v.as_str() {
-                    "Bitcoin" => Ok(BlockChainNames::Bitcoin),
-                    "Bitcoin_Cash" => Ok(BlockChainNames::BitcoinCash),
-                    "Dogecoin" => Ok(BlockChainNames::Dogecoin),
-                    "Litecoin" => Ok(BlockChainNames::Litecoin),
-                    "Dash" => Ok(BlockChainNames::Dash),
-                    "Ethereum" => Ok(BlockChainNames::Ethereum),
-                    "Ethereum_Classic" => Ok(BlockChainNames::EthereumClassic),
-                    _ => Err(serde::de::Error::custom("Invalid BlockChainName"))
-                }
-            }
+            StringOrU64::U64(_v) => Err(serde::de::Error::custom("Can't blockchainname from U64")),
+            StringOrU64::Str(v) => match v.as_str() {
+                "Bitcoin" => Ok(BlockChainNames::Bitcoin),
+                "Bitcoin_Cash" => Ok(BlockChainNames::BitcoinCash),
+                "Dogecoin" => Ok(BlockChainNames::Dogecoin),
+                "Litecoin" => Ok(BlockChainNames::Litecoin),
+                "Dash" => Ok(BlockChainNames::Dash),
+                "Ethereum" => Ok(BlockChainNames::Ethereum),
+                "Ethereum_Classic" => Ok(BlockChainNames::EthereumClassic),
+                _ => Err(serde::de::Error::custom("Invalid BlockChainName")),
+            },
         }
     }
 }
@@ -329,7 +331,8 @@ impl <'de>Deserialize<'de> for BlockChainNames{
 impl Serialize for BlockChainNames {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
-        S: Serializer {
+        S: Serializer,
+    {
         match self {
             BlockChainNames::Bitcoin => serializer.serialize_str("Bitcoin"),
             BlockChainNames::BitcoinCash => serializer.serialize_str("Bitcoin_Cash"),
@@ -341,8 +344,6 @@ impl Serialize for BlockChainNames {
         }
     }
 }
-
-
 
 impl fmt::Display for BlockChainNames {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
@@ -361,7 +362,7 @@ impl fmt::Display for BlockChainNames {
 
 #[allow(dead_code)]
 #[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Hash, Getters, CopyGetters)]
-pub struct BlockChain { 
+pub struct BlockChain {
     #[getset(get = "pub")]
     name: String,
     #[getset(get = "pub")]
@@ -369,7 +370,7 @@ pub struct BlockChain {
     #[getset(get = "pub")]
     key: String,
     #[getset(get_copy = "pub")]
-    decimal_places: u8
+    decimal_places: u8,
 }
 
 impl Eq for BlockChain {}
@@ -381,44 +382,44 @@ impl BlockChain {
                 name: "Bitcoin".to_string(),
                 short_description: "BTC".to_string(),
                 key: "bitcoin".to_string(),
-                decimal_places: 8
+                decimal_places: 8,
             },
             BlockChainNames::BitcoinCash => BlockChain {
                 name: "Bitcoin Cash".to_string(),
                 short_description: "BCH".to_string(),
                 key: "bitcoin-cash".to_string(),
-                decimal_places: 8
-            }, 
+                decimal_places: 8,
+            },
             BlockChainNames::Dogecoin => BlockChain {
                 name: "Dogecoin".to_string(),
                 short_description: "DOGE".to_string(),
                 key: "dogecoin".to_string(),
-                decimal_places: 8
+                decimal_places: 8,
             },
             BlockChainNames::Litecoin => BlockChain {
                 name: "Litecoin".to_string(),
                 short_description: "LTC".to_string(),
                 key: "litecoin".to_string(),
-                decimal_places: 8
+                decimal_places: 8,
             },
             BlockChainNames::Dash => BlockChain {
                 name: "Dash".to_string(),
                 short_description: "DASH".to_string(),
                 key: "dash".to_string(),
-                decimal_places: 8
+                decimal_places: 8,
             },
             BlockChainNames::Ethereum => BlockChain {
                 name: "Ethereum".to_string(),
                 short_description: "ETH".to_string(),
                 key: "ethereum".to_string(),
-                decimal_places: 18
+                decimal_places: 18,
             },
             BlockChainNames::EthereumClassic => BlockChain {
                 name: "Ethereum Classic".to_string(),
                 short_description: "ETC".to_string(),
                 key: "ethereum-classic".to_string(),
-                decimal_places: 18
-            }
+                decimal_places: 18,
+            },
         }
     }
     pub fn new_from_string(name: String) -> Result<Self, Box<dyn Error>> {
@@ -432,8 +433,7 @@ impl BlockChain {
             "dash" => Ok(BlockChain::new(BlockChainNames::Dash)),
             "ethereum" => Ok(BlockChain::new(BlockChainNames::Ethereum)),
             "ethereum-classic" => Ok(BlockChain::new(BlockChainNames::EthereumClassic)),
-            "ethereum_classic" => Ok(BlockChain::new(BlockChainNames::EthereumClassic)),
-            _ => bail!("Invalid blockchain name")
+            _ => bail!("Invalid blockchain name"),
         }
     }
 }
@@ -472,7 +472,6 @@ mod test {
 
         let new_name: BlockChainNames = serde_json::from_str(&string_name).unwrap();
         assert_eq!(new_name, BlockChainNames::BitcoinCash);
-
     }
     #[test]
     fn test_serde_blockchain_names_eth() {
@@ -482,6 +481,5 @@ mod test {
 
         let new_name: BlockChainNames = serde_json::from_str(&string_name).unwrap();
         assert_eq!(new_name, BlockChainNames::EthereumClassic);
-
     }
 }
