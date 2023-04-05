@@ -98,57 +98,7 @@ where
     }
 }
 
-// // UPDATED MW CODE
-// enum StringOrU64 { U64(i64), Str(String) }
-
-// pub fn deserialize_i64_or_string<'de, D>(deserializer: D) -> Result<Option<i64>, D::Error>
-// where
-//     D: Deserializer<'de>
-// {
-//     match StringOrU64::deserialize(deserializer)? {
-//         StringOrU64::U64(v) => { Ok(Some(v)) }
-//         StringOrU64::Str(v) => {
-//             let res = v.parse::<i64>();
-//             if let Ok(r) = res {
-//                 Ok(Some(r))
-//             } else {
-//                 Err(serde::de::Error::custom("Can't parse id!"))
-//             }
-//         }
-//     }
-// }
-
-pub fn deserialize_option_f64<'de, D>(deserializer: D) -> Result<Option<f64>, D::Error>
-where
-    D: Deserializer<'de>,
-{
-    struct OptionF64Visitor;
-
-    impl<'de> Visitor<'de> for OptionF64Visitor {
-        type Value = Option<f64>;
-
-        fn expecting(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
-            formatter.write_str("an integer or a string")
-        }
-
-        fn visit_i64<E: de::Error>(self, value: i64) -> Result<Option<f64>, E> {
-            Ok(Some(value as f64))
-        }
-
-        fn visit_u64<E: de::Error>(self, value: u64) -> Result<Option<f64>, E> {
-            Ok(Some(value as f64))
-        }
-
-        fn visit_str<E: de::Error>(self, value: &str) -> Result<Option<f64>, E> {
-            match value.parse::<f64>() {
-                Ok(parsed_value) => Ok(Some(parsed_value)),
-                Err(_) => Ok(None),
-            }
-        }
-    }
-
-    deserializer.deserialize_any(OptionF64Visitor)
-}
+// DELETED UNNECESSARY MW FUNCTION / TEST ATTRIBUTION 
 
 fn default_f64() -> f64 {
     return 0.0;
