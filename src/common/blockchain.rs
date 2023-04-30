@@ -3,7 +3,6 @@ use easy_error::bail;
 use getset::{CopyGetters, Getters};
 use named_type::NamedType;
 use named_type_derive::*;
-use serde::de::{self, Visitor};
 use serde::{Deserialize, Serialize};
 use serde::{Deserializer, Serializer};
 use std::error::Error;
